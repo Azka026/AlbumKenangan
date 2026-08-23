@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Album Kenangan Si Kecil</title>
-    <!-- Library untuk membaca metadata EXIF tanggal foto -->
     <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -60,15 +59,12 @@
             <p>Jurnal tumbuh kembang dan momen berharga</p>
         </header>
 
-        <!-- AREA KHUSUS ADMIN -->
         <div id="adminPanel" class="admin-only">
-            <!-- PENGATURAN TANGGAL LAHIR -->
             <div class="profile-section">
                 <label for="dob">🎂 Tanggal Lahir Anak (Pengaturan Admin):</label>
                 <input type="date" id="dob" onchange="saveDOB()">
             </div>
 
-            <!-- FORM UPLOAD FOTO BARU -->
             <div class="upload-section">
                 <h3>➕ Tambah Kenangan Baru (Admin)</h3>
                 <form id="uploadForm">
@@ -111,15 +107,59 @@
         const ADMIN_PASSWORD = "azka23";
 
         let calculatedUsiaText = "";
-        let isAdminLoggedIn = false;
 
+        // SAAT HALAMAN DIMUAT (TERMASUK REFRESH)
         window.onload = function() {
+            // Restore Tanggal Lahir
             const savedDOB = localStorage.getItem('child_dob');
             if (savedDOB) {
                 document.getElementById('dob').value = savedDOB;
             }
+
+            // Restore Status Login Admin dari LocalStorage
+            const isSavedAdmin = localStorage.getItem('is_admin_logged_in');
+            if (isSavedAdmin === 'true') {
+                showAdminUI(true);
+            }
+
             loadAlbum();
         };
+
+        // FUNGSI TAMPILKAN/SEMBUNYIKAN UI ADMIN
+        function showAdminUI(isLoggedIn) {
+            const adminPanel = document.getElementById('adminPanel');
+            const adminBtn = document.getElementById('adminBtn');
+
+            if (isLoggedIn) {
+                adminPanel.style.display = 'block';
+                adminBtn.innerText = '🔓 Keluar Admin';
+            } else {
+                adminPanel.style.display = 'none';
+                adminBtn.innerText = '🔒 Admin';
+            }
+        }
+
+        // FUNGSI TOGGLE MODE ADMIN (LOGIN / LOGOUT)
+        function toggleAdminMode() {
+            const isCurrentlyAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
+
+            if (isCurrentlyAdmin) {
+                // Logout Admin
+                localStorage.setItem('is_admin_logged_in', 'false');
+                showAdminUI(false);
+                alert('Mode Admin telah ditutup.');
+            } else {
+                // Login Admin
+                const inputPassword = prompt("Masukkan Password Admin:");
+                if (inputPassword === ADMIN_PASSWORD) {
+                    localStorage.setItem('is_admin_logged_in', 'true');
+                    showAdminUI(true);
+                    alert('Berhasil masuk sebagai Admin!');
+                } else if (inputPassword !== null) {
+                    alert("Password salah!");
+                }
+            }
+        }
 
         // FUNGSI DETEKSI TANGGAL FOTO OTOMATIS (Membaca EXIF Meta)
         function detectPhotoDate(input) {
@@ -135,18 +175,16 @@
                 const dateTime = EXIF.getTag(this, "DateTimeOriginal") || EXIF.getTag(this, "DateTime");
                 
                 if (dateTime) {
-                    // Format EXIF biasanya: "YYYY:MM:DD HH:MM:SS"
                     const parts = dateTime.split(" ")[0].split(":");
                     if (parts.length === 3) {
                         const formattedDate = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
                         tanggalFotoInput.value = formattedDate;
                         exifNotice.innerText = "✨ Tanggal pengambilan foto berhasil terdeteksi otomatis!";
-                        calculateAutoAge(); // Langsung hitung usia otomatis
+                        calculateAutoAge();
                         return;
                     }
                 }
 
-                // Jika EXIF tidak ditemukan, ambil dari Last Modified tanggal file lokal HP/PC
                 if (file.lastModified) {
                     const fileDate = new Date(file.lastModified);
                     const year = fileDate.getFullYear();
@@ -159,29 +197,6 @@
                     exifNotice.innerText = "⚠️ Tanggal foto tidak ditemukan. Silakan isi tanggal secara manual.";
                 }
             });
-        }
-
-        // FUNGSI TOGGLE MODE ADMIN
-        function toggleAdminMode() {
-            const adminPanel = document.getElementById('adminPanel');
-            const adminBtn = document.getElementById('adminBtn');
-
-            if (isAdminLoggedIn) {
-                isAdminLoggedIn = false;
-                adminPanel.style.display = 'none';
-                adminBtn.innerText = '🔒 Admin';
-                alert('Mode Admin telah ditutup.');
-            } else {
-                const inputPassword = prompt("Masukkan Password Admin:");
-                if (inputPassword === ADMIN_PASSWORD) {
-                    isAdminLoggedIn = true;
-                    adminPanel.style.display = 'block';
-                    adminBtn.innerText = '🔓 Keluar Admin';
-                    alert('Berhasil masuk sebagai Admin!');
-                } else if (inputPassword !== null) {
-                    alert("Password salah!");
-                }
-            }
         }
 
         function saveDOB() {
