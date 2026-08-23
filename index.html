@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Album Kenangan Si Kecil</title>
+    <title>Album Kenangan Si Kecil 👶✨</title>
     
     <!-- PWA & Web App Meta Tags -->
-    <meta name="theme-color" content="#3182ce">
+    <meta name="theme-color" content="#ff758c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Album Kecil">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2922/2922506.png">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Manifest Inline via Data URI -->
     <link rel="manifest" href='data:application/manifest+json,{
@@ -18,8 +21,8 @@
         "short_name": "Album Kecil",
         "start_url": "./",
         "display": "standalone",
-        "background_color": "#f8f9fa",
-        "theme_color": "#3182ce",
+        "background_color": "#fff5f5",
+        "theme_color": "#ff758c",
         "icons": [
             {
                 "src": "https://cdn-icons-png.flaticon.com/512/2922/2922506.png",
@@ -38,58 +41,251 @@
     <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 
     <style>
+        :root {
+            --primary: #ff758c;
+            --primary-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            --secondary: #667eea;
+            --bg-color: #fcf8f8;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --radius: 20px;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: #f8f9fa; color: #333; padding: 20px 15px; }
-        .container { max-width: 800px; margin: 0 auto; }
         
-        header { text-align: center; padding: 25px 15px; background: #fff; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); position: relative; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            padding: 20px 15px; 
+            min-height: 100vh;
+        }
+
+        .container { max-width: 750px; margin: 0 auto; }
+        
+        /* Header Styling */
+        header { 
+            text-align: center; 
+            padding: 35px 20px; 
+            background: var(--primary-gradient); 
+            color: white;
+            border-radius: var(--radius); 
+            margin-bottom: 25px; 
+            box-shadow: 0 10px 25px rgba(255, 117, 140, 0.25); 
+            position: relative; 
+        }
+
+        header h1 { font-size: 1.8em; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+        header p { font-size: 0.95em; opacity: 0.9; font-weight: 400; }
         
         /* Tombol Admin Panel */
-        .admin-toggle-btn { position: absolute; top: 15px; right: 15px; background: #edf2f7; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; color: #4a5568; font-weight: bold; }
-        .admin-toggle-btn:hover { background: #e2e8f0; }
+        .admin-toggle-btn { 
+            position: absolute; 
+            top: 15px; 
+            right: 15px; 
+            background: rgba(255, 255, 255, 0.25); 
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.4); 
+            padding: 6px 14px; 
+            border-radius: 30px; 
+            font-size: 0.75em; 
+            cursor: pointer; 
+            color: white; 
+            font-weight: 600; 
+            transition: all 0.2s;
+        }
+        .admin-toggle-btn:hover { background: rgba(255, 255, 255, 0.4); }
 
         /* Banner Install PWA */
-        .install-banner { display: none; background: #ebf8ff; border: 1px solid #3182ce; padding: 12px 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; align-items: center; justify-content: space-between; }
-        .install-banner span { font-size: 0.9em; font-weight: 600; color: #2b6cb0; }
-        .btn-install { background: #3182ce; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85em; }
+        .install-banner { 
+            display: none; 
+            background: #fff; 
+            border: 2px dashed #ff7eb3; 
+            padding: 15px 20px; 
+            border-radius: 16px; 
+            margin-bottom: 25px; 
+            text-align: center; 
+            align-items: center; 
+            justify-content: space-between; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .install-banner span { font-size: 0.9em; font-weight: 600; color: #4a5568; }
+        .btn-install { 
+            background: var(--primary-gradient); 
+            color: #fff; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 0.85em; 
+            box-shadow: 0 4px 10px rgba(255, 117, 140, 0.3);
+        }
 
-        /* Admin Box */
-        .admin-only { display: none; }
+        /* Admin Box Container */
+        .admin-only { display: none; animation: fadeIn 0.3s ease; }
         
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* Profile & Setting Section */
-        .profile-section { background: #ebf8ff; border: 1px solid #bee3f8; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; }
-        .profile-section label { font-size: 0.9em; font-weight: bold; color: #2b6cb0; display: block; margin-bottom: 5px; }
-        .profile-section input { padding: 8px 12px; border: 1px solid #90cdf4; border-radius: 6px; font-size: 0.95em; width: 100%; max-width: 250px; }
+        .profile-section { 
+            background: #fff; 
+            border: 1px solid #edf2f7; 
+            padding: 20px; 
+            border-radius: var(--radius); 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+        .profile-section label { font-size: 0.85em; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .profile-section input { 
+            padding: 12px 16px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+            font-size: 0.95em; 
+            width: 100%; 
+            transition: border-color 0.2s;
+        }
+        .profile-section input:focus { outline: none; border-color: var(--primary); }
 
-        /* Form Styling */
-        .upload-section { background: #fff; padding: 20px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 2px solid #3182ce; }
-        .upload-section h3 { margin-bottom: 15px; color: #2c3e50; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.9em; font-weight: 600; margin-bottom: 5px; color: #4a5568; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 0.95em; }
-        .form-group textarea { resize: vertical; height: 80px; }
+        /* Form Upload Styling */
+        .upload-section { 
+            background: #fff; 
+            padding: 25px; 
+            border-radius: var(--radius); 
+            margin-bottom: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            border: 1px solid #edf2f7; 
+        }
+        .upload-section h3 { margin-bottom: 20px; color: var(--text-main); font-size: 1.2em; display: flex; align-items: center; gap: 8px; }
         
-        .auto-age-preview { font-size: 0.85em; color: #dd6b20; font-weight: bold; margin-top: 5px; display: block; }
-        .exif-info { font-size: 0.8em; color: #38a169; font-weight: bold; margin-top: 3px; display: block; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 0.85em; font-weight: 700; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group textarea { 
+            width: 100%; 
+            padding: 12px 16px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+            font-size: 0.95em; 
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: #fafafa;
+        }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); background: #fff; }
+        .form-group textarea { resize: vertical; height: 90px; }
         
-        .btn-submit { background: #3182ce; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1em; }
-        .btn-submit:disabled { background: #a0aec0; }
+        .auto-age-preview { font-size: 0.85em; color: #d69e2e; font-weight: 700; margin-top: 6px; display: block; }
+        .exif-info { font-size: 0.8em; color: #38a169; font-weight: 700; margin-top: 6px; display: block; }
+        
+        .btn-submit { 
+            background: var(--primary-gradient); 
+            color: #fff; 
+            border: none; 
+            padding: 14px 20px; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            width: 100%; 
+            cursor: pointer; 
+            font-size: 1em; 
+            box-shadow: 0 6px 20px rgba(255, 117, 140, 0.35);
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        .btn-submit:active { transform: scale(0.98); }
+        .btn-submit:disabled { background: #cbd5e0; box-shadow: none; cursor: not-allowed; }
 
         /* Card Album Styling */
-        .card { background: #ffffff; border-radius: 16px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); position: relative; }
-        .card-img { width: 100%; max-height: 550px; object-fit: contain; background: #f0f0f0; display: block; }
-        .card-body { padding: 20px; }
-        .meta-info { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.85em; color: #e67e22; font-weight: 600; margin-bottom: 10px; }
-        .card-title { font-size: 1.3em; color: #2c3e50; margin-bottom: 8px; }
-        .card-story { line-height: 1.6; color: #4a5568; margin-bottom: 15px; white-space: pre-line; }
-        .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #edf2f7; padding-top: 12px; }
-        .btn-download { background: #27ae60; color: white; padding: 8px 14px; text-decoration: none; border-radius: 6px; font-size: 0.85em; font-weight: bold; }
+        .section-title { font-size: 1.3em; color: var(--text-main); margin-bottom: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        
+        .card { 
+            background: var(--card-bg); 
+            border-radius: var(--radius); 
+            overflow: hidden; 
+            margin-bottom: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: transform 0.2s;
+        }
+        
+        .card-img-container {
+            width: 100%;
+            background: #f7fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .card-img { 
+            width: 100%; 
+            max-height: 600px; 
+            object-fit: contain; 
+            display: block; 
+        }
+        
+        .card-body { padding: 22px; }
+        
+        .meta-info { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            font-size: 0.8em; 
+            color: #b7791f; 
+            background: #fffaf0;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-weight: 700; 
+            margin-bottom: 14px; 
+            align-items: center;
+            border: 1px solid #feebc8;
+        }
+
+        .card-title { font-size: 1.25em; color: var(--text-main); margin-bottom: 10px; font-weight: 700; letter-spacing: -0.3px; }
+        .card-story { line-height: 1.7; color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; white-space: pre-line; }
+        
+        .card-footer { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-top: 1px solid #edf2f7; 
+            padding-top: 15px; 
+        }
+        
+        .location-tag { font-size: 0.85em; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+        .btn-download { 
+            background: #48bb78; 
+            color: white; 
+            padding: 8px 16px; 
+            text-decoration: none; 
+            border-radius: 10px; 
+            font-size: 0.8em; 
+            font-weight: 700; 
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.25);
+            transition: background 0.2s;
+        }
+        .btn-download:hover { background: #38a169; }
         
         /* Tombol Hapus Khusus Admin di Kartu */
-        .admin-delete-btn { display: none; background: #e53e3e; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8em; font-weight: bold; cursor: pointer; margin-top: 12px; }
-        .admin-delete-btn:hover { background: #c53030; }
+        .admin-delete-btn { 
+            display: none; 
+            background: #fff5f5; 
+            color: #e53e3e; 
+            border: 1px solid #feb2b2; 
+            padding: 8px 14px; 
+            border-radius: 10px; 
+            font-size: 0.8em; 
+            font-weight: 700; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .admin-delete-btn:hover { background: #e53e3e; color: white; }
 
-        .status-msg { text-align: center; padding: 30px; color: #7f8c8d; }
+        .status-msg { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500; }
     </style>
 </head>
 <body>
@@ -97,8 +293,8 @@
     <div class="container">
         <header>
             <button class="admin-toggle-btn" onclick="toggleAdminMode()" id="adminBtn">🔒 Admin</button>
-            <h1>Album Kenangan Si Kecil 👶</h1>
-            <p>Jurnal tumbuh kembang dan momen berharga</p>
+            <h1>Album Kenangan Si Kecil 👶✨</h1>
+            <p>Jurnal tumbuh kembang dan momen berharga penuh cinta</p>
         </header>
 
         <!-- BANNER PROMPT INSTALL PWA -->
@@ -117,7 +313,7 @@
 
             <!-- FORM UPLOAD FOTO BARU -->
             <div class="upload-section">
-                <h3>➕ Tambah Kenangan Baru (Admin)</h3>
+                <h3>➕ Tambah Kenangan Baru</h3>
                 <form id="uploadForm">
                     <div class="form-group">
                         <label>Pilih Foto Original:</label>
@@ -146,8 +342,8 @@
             </div>
         </div>
 
-        <h3 style="margin-bottom: 15px; color: #2c3e50;">📸 Galeri Album</h3>
-        <div id="album-list" class="status-msg">Memuat album kenangan...</div>
+        <h3 class="section-title">📸 Galeri Kenangan</h3>
+        <div id="album-list" class="status-msg">Memuat album kenangan... ✨</div>
     </div>
 
     <script>
@@ -212,7 +408,7 @@
             if (isLoggedIn) {
                 adminPanel.style.display = 'block';
                 adminBtn.innerText = '🔓 Keluar Admin';
-                deleteButtons.forEach(btn => btn.style.display = 'inline-block');
+                deleteButtons.forEach(btn => btn.style.display = 'block');
             } else {
                 adminPanel.style.display = 'none';
                 adminBtn.innerText = '🔒 Admin';
@@ -373,6 +569,11 @@
                     return dateB - dateA;
                 });
 
+                if (items.length === 0 || (items.length === 1 && items[0][0] === "")) {
+                    albumList.innerHTML = '<div class="status-msg">Belum ada kenangan foto yang diunggah. ✨</div>';
+                    return;
+                }
+
                 items.forEach(row => {
                     if (row.length < 8) return;
                     const [id, tanggal, judul, cerita, lokasi, usia, fileFoto, fileId] = row;
@@ -385,7 +586,9 @@
 
                     albumList.innerHTML += `
                         <div class="card" id="card-${id}">
-                            <img class="card-img" src="${imageUrl}" alt="${judul}" loading="lazy">
+                            <div class="card-img-container">
+                                <img class="card-img" src="${imageUrl}" alt="${judul}" loading="lazy">
+                            </div>
                             <div class="card-body">
                                 <div class="meta-info">
                                     ${tanggal ? `<span>📅 ${tanggal}</span>` : ''}
@@ -394,10 +597,10 @@
                                 <h2 class="card-title">${judul || 'Momen Berharga'}</h2>
                                 <p class="card-story">${cerita || ''}</p>
                                 <div class="card-footer">
-                                    <span style="font-size: 0.85em; color: #718096;">${lokasi ? '📍 ' + lokasi : ''}</span>
-                                    <a href="${downloadUrl}" class="btn-download" target="_blank" download>📥 Unduh Foto Asli</a>
+                                    <span class="location-tag">${lokasi ? '📍 ' + lokasi : ''}</span>
+                                    <a href="${downloadUrl}" class="btn-download" target="_blank" download>📥 Unduh Foto</a>
                                 </div>
-                                <button class="admin-delete-btn" style="display: ${isAdmin ? 'inline-block' : 'none'};" onclick="deletePhoto('${id}')">🗑️ Hapus Foto Ini</button>
+                                <button class="admin-delete-btn" style="display: ${isAdmin ? 'block' : 'none'};" onclick="deletePhoto('${id}')">🗑️ Hapus Foto Ini</button>
                             </div>
                         </div>
                     `;
