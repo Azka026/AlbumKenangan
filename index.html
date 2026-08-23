@@ -64,7 +64,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: var(--bg-color); 
             color: var(--text-main); 
-            padding: 20px 15px; 
+            padding: 20px 15px 90px 15px; /* Tambah padding bottom agar tidak tertutup banner PWA */
             min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
         }
@@ -252,7 +252,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            cursor: pointer; /* Indikasi bahwa gambar bisa diklik */
+            cursor: pointer;
             position: relative;
         }
 
@@ -268,7 +268,6 @@
             transform: scale(1.02);
         }
 
-        /* Overlay petunjuk klik pada foto */
         .card-img-container::after {
             content: "🔍 Klik untuk memperbesar";
             position: absolute;
@@ -326,7 +325,7 @@
         }
         .btn-download:hover { background: #2c7a7b; }
         
-        /* Tombol Hapus Khusus Admin di Kartu */
+        /* Tombol Hapus Khusus Admin */
         .admin-delete-btn { 
             display: none; 
             background: #fff5f5; 
@@ -345,7 +344,7 @@
 
         .status-msg { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500; }
 
-        /* MODAL / FULLSCREEN IMAGE VIEWER */
+        /* MODAL / FULLSCREEN VIEWER */
         .image-modal {
             display: none;
             position: fixed;
@@ -387,6 +386,77 @@
             user-select: none;
         }
         .modal-close:hover { color: #e2e8f0; }
+
+        /* BANNER PROMPT INSTALL APLIKASI DI BAWAH */
+        .pwa-install-banner {
+            display: none;
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 500px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 14px 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid #e2e8f0;
+            z-index: 9998;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        .pwa-install-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pwa-install-info img {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+        }
+
+        .pwa-install-text h5 {
+            font-size: 0.9em;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .pwa-install-text p {
+            font-size: 0.75em;
+            color: var(--text-muted);
+        }
+
+        .btn-pwa-install {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 9px 15px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.8em;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+        }
+
+        .btn-pwa-close {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0 4px;
+        }
     </style>
 </head>
 <body>
@@ -398,7 +468,7 @@
             <p>Jurnal tumbuh kembang dan momen berharga penuh cinta</p>
         </header>
 
-        <!-- KARTU INFORMASI ANAK (DEPAN) -->
+        <!-- KARTU INFORMASI ANAK -->
         <div class="child-info-card">
             <h2 id="childNameDisplay">👶 Si Kecil</h2>
             <p id="childParentsDisplay">Buah hati tercinta</p>
@@ -473,6 +543,21 @@
         <img class="modal-content" id="modalImg">
     </div>
 
+    <!-- BANNER PROMPT INSTALL APLIKASI DI BAWAH -->
+    <div id="pwaBanner" class="pwa-install-banner">
+        <div class="pwa-install-info">
+            <img src="https://cdn-icons-png.flaticon.com/512/2922/2922506.png" alt="Icon">
+            <div class="pwa-install-text">
+                <h5>Album Si Kecil</h5>
+                <p>Pasang di layar utama HP Anda</p>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn-pwa-install" onclick="installApp()">Jadikan Aplikasi</button>
+            <button class="btn-pwa-close" onclick="dismissPwaBanner()">&times;</button>
+        </div>
+    </div>
+
     <script>
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzeZyME0o4ronjhw9TPjQXWW2N28QiNZC54CxOnST1GAvCVTNqxjSDjgbrPWNIc4PUq/exec';
@@ -480,6 +565,7 @@
         const ADMIN_PASSWORD = "azka23";
 
         let calculatedUsiaText = "";
+        let deferredPrompt = null;
 
         // DATA MULTI ANAK
         let childrenData = JSON.parse(localStorage.getItem('children_data')) || [
@@ -499,6 +585,33 @@
                 const swUrl = URL.createObjectURL(blob);
                 navigator.serviceWorker.register(swUrl).catch(err => console.log('SW error:', err));
             });
+        }
+
+        // FUNGSI UNTUK MENANGKAP PROMPT INSTALL APLIKASI
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Tampilkan banner di bawah jika pengguna belum pernah menutupnya
+            if (!localStorage.getItem('pwa_banner_dismissed')) {
+                document.getElementById('pwaBanner').style.display = 'flex';
+            }
+        });
+
+        async function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User menerima instalasi PWA');
+                }
+                deferredPrompt = null;
+                document.getElementById('pwaBanner').style.display = 'none';
+            }
+        }
+
+        function dismissPwaBanner() {
+            document.getElementById('pwaBanner').style.display = 'none';
+            localStorage.setItem('pwa_banner_dismissed', 'true');
         }
 
         window.onload = function() {
