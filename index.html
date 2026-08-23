@@ -76,14 +76,19 @@
         .btn-submit:disabled { background: #a0aec0; }
 
         /* Card Album Styling */
-        .card { background: #ffffff; border-radius: 16px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+        .card { background: #ffffff; border-radius: 16px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); position: relative; }
         .card-img { width: 100%; max-height: 550px; object-fit: contain; background: #f0f0f0; display: block; }
         .card-body { padding: 20px; }
-        .meta-info { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85em; color: #e67e22; font-weight: 600; margin-bottom: 10px; }
+        .meta-info { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.85em; color: #e67e22; font-weight: 600; margin-bottom: 10px; }
         .card-title { font-size: 1.3em; color: #2c3e50; margin-bottom: 8px; }
         .card-story { line-height: 1.6; color: #4a5568; margin-bottom: 15px; white-space: pre-line; }
         .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #edf2f7; padding-top: 12px; }
         .btn-download { background: #27ae60; color: white; padding: 8px 14px; text-decoration: none; border-radius: 6px; font-size: 0.85em; font-weight: bold; }
+        
+        /* Tombol Hapus Khusus Admin di Kartu */
+        .admin-delete-btn { display: none; background: #e53e3e; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8em; font-weight: bold; cursor: pointer; margin-top: 12px; }
+        .admin-delete-btn:hover { background: #c53030; }
+
         .status-msg { text-align: center; padding: 30px; color: #7f8c8d; }
     </style>
 </head>
@@ -96,7 +101,7 @@
             <p>Jurnal tumbuh kembang dan momen berharga</p>
         </header>
 
-        <!-- BANNER PROMPT INSTALL APLIKASI -->
+        <!-- BANNER PROMPT INSTALL PWA -->
         <div id="installBanner" class="install-banner">
             <span>📱 Pasang aplikasi di HP Anda untuk akses cepat!</span>
             <button class="btn-install" onclick="installPWA()">Install</button>
@@ -149,13 +154,11 @@
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxc9cTAzB7yXdWh9BlTKk2b1xePiNM3XclCBxWlX_enNjwam9DeNgEw-9iqXMlubJbh/exec';
 
-        // PASSWORD ADMIN
         const ADMIN_PASSWORD = "azka23";
 
         let calculatedUsiaText = "";
         let deferredPrompt;
 
-        // REGISTRASI SERVICE WORKER UNTUK PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `
@@ -169,7 +172,6 @@
             });
         }
 
-        // TANGKAP EVENT INSTALL PWA
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
@@ -188,7 +190,6 @@
             }
         }
 
-        // SAAT HALAMAN DIMUAT
         window.onload = function() {
             const savedDOB = localStorage.getItem('child_dob');
             if (savedDOB) {
@@ -206,13 +207,16 @@
         function showAdminUI(isLoggedIn) {
             const adminPanel = document.getElementById('adminPanel');
             const adminBtn = document.getElementById('adminBtn');
+            const deleteButtons = document.querySelectorAll('.admin-delete-btn');
 
             if (isLoggedIn) {
                 adminPanel.style.display = 'block';
                 adminBtn.innerText = '🔓 Keluar Admin';
+                deleteButtons.forEach(btn => btn.style.display = 'inline-block');
             } else {
                 adminPanel.style.display = 'none';
                 adminBtn.innerText = '🔒 Admin';
+                deleteButtons.forEach(btn => btn.style.display = 'none');
             }
         }
 
@@ -336,7 +340,7 @@
             return `${parseInt(parts[2])} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
         }
 
-        // LOAD ALBUM DENGAN URUTAN TANGGAL FOTO (TERBARU DULUAN)
+        // LOAD ALBUM
         async function loadAlbum() {
             try {
                 const response = await fetch(SHEET_CSV_URL + '&r=' + Math.random());
@@ -363,7 +367,6 @@
                     return new Date(dateStr);
                 }
 
-                // Sorting berdasarkan Tanggal Foto Terbaru
                 items.sort((a, b) => {
                     const dateA = parseIndoDate(a[1]);
                     const dateB = parseIndoDate(b[1]);
@@ -378,9 +381,10 @@
 
                     const imageUrl = `https://lh3.googleusercontent.com/d/${cleanFileId}`;
                     const downloadUrl = `https://drive.google.com/uc?export=download&id=${cleanFileId}`;
+                    const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
 
                     albumList.innerHTML += `
-                        <div class="card">
+                        <div class="card" id="card-${id}">
                             <img class="card-img" src="${imageUrl}" alt="${judul}" loading="lazy">
                             <div class="card-body">
                                 <div class="meta-info">
@@ -393,6 +397,7 @@
                                     <span style="font-size: 0.85em; color: #718096;">${lokasi ? '📍 ' + lokasi : ''}</span>
                                     <a href="${downloadUrl}" class="btn-download" target="_blank" download>📥 Unduh Foto Asli</a>
                                 </div>
+                                <button class="admin-delete-btn" style="display: ${isAdmin ? 'inline-block' : 'none'};" onclick="deletePhoto('${id}')">🗑️ Hapus Foto Ini</button>
                             </div>
                         </div>
                     `;
@@ -402,7 +407,30 @@
             }
         }
 
-        // FUNGSI KOMPRESI GAMBAR OTOMATIS
+        // FUNGSI HAPUS FOTO
+        async function deletePhoto(id) {
+            if (!confirm("Apakah Anda yakin ingin menghapus kenangan foto ini?")) return;
+
+            try {
+                const res = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "delete", id: id })
+                });
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    alert("🗑️ Foto berhasil dihapus!");
+                    loadAlbum();
+                } else {
+                    alert("Gagal menghapus foto.");
+                }
+            } catch (err) {
+                alert("Terjadi kesalahan koneksi.");
+                console.error(err);
+            }
+        }
+
+        // KOMPRESI GAMBAR
         function compressImage(file, maxWidth = 1600, quality = 0.8) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -435,7 +463,6 @@
             });
         }
 
-        // Handle Submit Form Upload
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
@@ -480,7 +507,7 @@
                     alert("Gagal mengunggah dari server: " + (data.error || "Kesalahan tidak diketahui"));
                 }
             } catch (err) {
-                alert("Terjadi kesalahan koneksi saat mengunggah. Coba pastikan file foto tidak rusak atau jaringan stabil.");
+                alert("Terjadi kesalahan koneksi saat mengunggah.");
                 console.error(err);
             } finally {
                 btn.disabled = false;
