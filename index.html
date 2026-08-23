@@ -5,43 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Album Kenangan Si Kecil 👶✨</title>
     
-    <!-- PWA Meta Tags untuk Aplikasi Mobile / APK -->
+    <!-- Meta Tags PWA -->
     <meta name="theme-color" content="#3182ce">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Album Kecil">
-    <meta name="application-name" content="Album Kecil">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2922/2922506.png">
+
+    <!-- Memanggil File Manifest Asli -->
+    <link rel="manifest" href="./manifest.json">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PWA Manifest Inline -->
-    <link rel="manifest" href='data:application/manifest+json,{
-        "name": "Album Kenangan Si Kecil",
-        "short_name": "Album Kecil",
-        "description": "Jurnal tumbuh kembang dan momen berharga anak",
-        "start_url": "./",
-        "display": "standalone",
-        "orientation": "portrait",
-        "background_color": "#f7fafc",
-        "theme_color": "#3182ce",
-        "icons": [
-            {
-                "src": "https://cdn-icons-png.flaticon.com/512/2922/2922506.png",
-                "sizes": "192x192",
-                "type": "image/png",
-                "purpose": "any maskable"
-            },
-            {
-                "src": "https://cdn-icons-png.flaticon.com/512/2922/2922506.png",
-                "sizes": "512x512",
-                "type": "image/png",
-                "purpose": "any maskable"
-            }
-        ]
-    }'>
 
     <!-- Library EXIF JS -->
     <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
@@ -64,14 +40,13 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: var(--bg-color); 
             color: var(--text-main); 
-            padding: 20px 15px 90px 15px; /* Tambah padding bottom agar tidak tertutup banner PWA */
+            padding: 20px 15px 90px 15px; 
             min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
         }
 
         .container { max-width: 750px; margin: 0 auto; }
         
-        /* Header Styling */
         header { 
             text-align: center; 
             padding: 35px 20px; 
@@ -86,7 +61,6 @@
         header h1 { font-size: 1.8em; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
         header p { font-size: 0.95em; opacity: 0.9; font-weight: 400; }
         
-        /* Kartu Profil Anak Aktif */
         .child-info-card {
             background: #fff;
             border-radius: 16px;
@@ -96,17 +70,8 @@
             border: 1px solid #e2e8f0;
             text-align: center;
         }
-        .child-info-card h2 {
-            font-size: 1.4em;
-            color: var(--primary);
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-        .child-info-card p {
-            font-size: 0.9em;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
+        .child-info-card h2 { font-size: 1.4em; color: var(--primary); font-weight: 700; margin-bottom: 6px; }
+        .child-info-card p { font-size: 0.9em; color: var(--text-muted); line-height: 1.5; }
 
         .child-select-front {
             margin-top: 12px;
@@ -121,7 +86,6 @@
             max-width: 300px;
         }
 
-        /* Tombol Admin Panel */
         .admin-toggle-btn { 
             position: absolute; 
             top: 15px; 
@@ -139,7 +103,6 @@
         }
         .admin-toggle-btn:hover { background: rgba(255, 255, 255, 0.4); }
 
-        /* Admin Box Container */
         .admin-only { display: none; animation: fadeIn 0.3s ease; }
         
         @keyframes fadeIn {
@@ -147,7 +110,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Profile & Setting Section */
         .profile-section { 
             background: #fff; 
             border: 1px solid #edf2f7; 
@@ -156,12 +118,7 @@
             margin-bottom: 20px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.03);
         }
-        .profile-section h4 {
-            font-size: 1em;
-            color: var(--primary);
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
+        .profile-section h4 { font-size: 1em; color: var(--primary); margin-bottom: 15px; font-weight: 700; }
         .profile-section label { font-size: 0.8em; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
         .profile-section input, .profile-section select { 
             padding: 10px 14px; 
@@ -187,7 +144,6 @@
             width: 100%;
         }
 
-        /* Form Upload Styling */
         .upload-section { 
             background: #fff; 
             padding: 25px; 
@@ -232,7 +188,6 @@
         .btn-submit:active { transform: scale(0.98); }
         .btn-submit:disabled { background: #cbd5e0; box-shadow: none; cursor: not-allowed; }
 
-        /* Card Album Styling */
         .section-title { font-size: 1.3em; color: var(--text-main); margin-bottom: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
         
         .card { 
@@ -264,9 +219,7 @@
             transition: transform 0.3s ease;
         }
         
-        .card-img-container:hover .card-img {
-            transform: scale(1.02);
-        }
+        .card-img-container:hover .card-img { transform: scale(1.02); }
 
         .card-img-container::after {
             content: "🔍 Klik untuk memperbesar";
@@ -325,7 +278,6 @@
         }
         .btn-download:hover { background: #2c7a7b; }
         
-        /* Tombol Hapus Khusus Admin */
         .admin-delete-btn { 
             display: none; 
             background: #fff5f5; 
@@ -344,7 +296,7 @@
 
         .status-msg { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500; }
 
-        /* MODAL / FULLSCREEN VIEWER */
+        /* MODAL FULLSCREEN */
         .image-modal {
             display: none;
             position: fixed;
@@ -385,7 +337,6 @@
             line-height: 1;
             user-select: none;
         }
-        .modal-close:hover { color: #e2e8f0; }
 
         /* BANNER PROMPT INSTALL APLIKASI DI BAWAH */
         .pwa-install-banner {
@@ -413,28 +364,10 @@
             to { transform: translate(-50%, 0); opacity: 1; }
         }
 
-        .pwa-install-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .pwa-install-info img {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-        }
-
-        .pwa-install-text h5 {
-            font-size: 0.9em;
-            color: var(--text-main);
-            font-weight: 700;
-        }
-
-        .pwa-install-text p {
-            font-size: 0.75em;
-            color: var(--text-muted);
-        }
+        .pwa-install-info { display: flex; align-items: center; gap: 12px; }
+        .pwa-install-info img { width: 42px; height: 42px; border-radius: 10px; }
+        .pwa-install-text h5 { font-size: 0.9em; color: var(--text-main); font-weight: 700; }
+        .pwa-install-text p { font-size: 0.75em; color: var(--text-muted); }
 
         .btn-pwa-install {
             background: var(--primary-gradient);
@@ -468,20 +401,16 @@
             <p>Jurnal tumbuh kembang dan momen berharga penuh cinta</p>
         </header>
 
-        <!-- KARTU INFORMASI ANAK -->
         <div class="child-info-card">
             <h2 id="childNameDisplay">👶 Si Kecil</h2>
             <p id="childParentsDisplay">Buah hati tercinta</p>
             
             <label for="selectChildFront" style="font-size: 0.8em; color: var(--text-muted); display: block; margin-top: 12px; font-weight: 600;">PILIH ANGGOTA KELUARGA / ANAK:</label>
             <select id="selectChildFront" class="child-select-front" onchange="changeActiveChild(this.value)">
-                <!-- Option diisi lewat JS -->
             </select>
         </div>
 
-        <!-- AREA KHUSUS ADMIN -->
         <div id="adminPanel" class="admin-only">
-            <!-- PENGATURAN INFORMASI ANAK -->
             <div class="profile-section">
                 <h4>⚙️ Kelola Profil Anak (Admin)</h4>
                 
@@ -489,7 +418,6 @@
 
                 <label for="selectChildAdmin">Pilih Anak yang Diubah:</label>
                 <select id="selectChildAdmin" onchange="changeActiveChild(this.value)">
-                    <!-- Option diisi lewat JS -->
                 </select>
 
                 <label for="childName">Nama Anak:</label>
@@ -502,7 +430,6 @@
                 <input type="date" id="dob" onchange="saveCurrentChildProfile()">
             </div>
 
-            <!-- FORM UPLOAD FOTO BARU -->
             <div class="upload-section">
                 <h3>➕ Tambah Kenangan Baru</h3>
                 <form id="uploadForm">
@@ -537,7 +464,6 @@
         <div id="album-list" class="status-msg">Memuat album kenangan... ✨</div>
     </div>
 
-    <!-- MODAL / FULLSCREEN VIEWER -->
     <div id="imageModal" class="image-modal" onclick="closeModal()">
         <span class="modal-close" onclick="closeModal()">&times;</span>
         <img class="modal-content" id="modalImg">
@@ -567,31 +493,23 @@
         let calculatedUsiaText = "";
         let deferredPrompt = null;
 
-        // DATA MULTI ANAK
         let childrenData = JSON.parse(localStorage.getItem('children_data')) || [
             { id: '1', name: 'Si Kecil', parents: '', dob: '' }
         ];
         let activeChildId = localStorage.getItem('active_child_id') || childrenData[0].id;
 
-        // REGISTRASI SERVICE WORKER OTOMATIS
+        // REGISTRASI SERVICE WORKER KE FILE sw.js FISIK
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                const swCode = `
-                    self.addEventListener('install', e => self.skipWaiting());
-                    self.addEventListener('activate', e => self.clients.claim());
-                    self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-                `;
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                const swUrl = URL.createObjectURL(blob);
-                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW error:', err));
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW terdaftar:', reg))
+                    .catch(err => console.log('SW Gagal:', err));
             });
         }
 
-        // FUNGSI UNTUK MENANGKAP PROMPT INSTALL APLIKASI
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Tampilkan banner di bawah jika pengguna belum pernah menutupnya
             if (!localStorage.getItem('pwa_banner_dismissed')) {
                 document.getElementById('pwaBanner').style.display = 'flex';
             }
@@ -602,7 +520,7 @@
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
-                    console.log('User menerima instalasi PWA');
+                    console.log('User menginstal aplikasi');
                 }
                 deferredPrompt = null;
                 document.getElementById('pwaBanner').style.display = 'none';
@@ -626,7 +544,6 @@
             loadAlbum();
         };
 
-        /* FUNGSI BUKA & TUTUP MODAL FULLSCREEN FOTO */
         function openModal(imgSrc) {
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImg');
@@ -848,7 +765,6 @@
             return `${parseInt(parts[2])} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
         }
 
-        // LOAD ALBUM
         async function loadAlbum() {
             try {
                 const response = await fetch(SHEET_CSV_URL + '&r=' + Math.random());
@@ -922,7 +838,6 @@
             }
         }
 
-        // FUNGSI HAPUS FOTO
         async function deletePhoto(id) {
             if (!confirm("Apakah Anda yakin ingin menghapus kenangan foto ini?")) return;
 
@@ -945,7 +860,6 @@
             }
         }
 
-        // KOMPRESI GAMBAR
         function compressImage(file, maxWidth = 1600, quality = 0.8) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
