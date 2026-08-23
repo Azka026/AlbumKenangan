@@ -4,7 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Album Kenangan Si Kecil</title>
+    
+    <meta name="theme-color" content="#3182ce">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Album Kecil">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2922/2922506.png">
+
+    <link rel="manifest" href='data:application/manifest+json,{
+        "name": "Album Kenangan Si Kecil",
+        "short_name": "Album Kecil",
+        "start_url": "./",
+        "display": "standalone",
+        "background_color": "#f8f9fa",
+        "theme_color": "#3182ce",
+        "icons": [
+            {
+                "src": "https://cdn-icons-png.flaticon.com/512/2922/2922506.png",
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": "https://cdn-icons-png.flaticon.com/512/2922/2922506.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ]
+    }'>
+
     <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: #f8f9fa; color: #333; padding: 20px 15px; }
@@ -15,6 +44,11 @@
         /* Tombol Admin Panel */
         .admin-toggle-btn { position: absolute; top: 15px; right: 15px; background: #edf2f7; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; color: #4a5568; font-weight: bold; }
         .admin-toggle-btn:hover { background: #e2e8f0; }
+
+        /* Banner Install PWA */
+        .install-banner { display: none; background: #ebf8ff; border: 1px solid #3182ce; padding: 12px 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; align-items: center; justify-content: space-between; }
+        .install-banner span { font-size: 0.9em; font-weight: 600; color: #2b6cb0; }
+        .btn-install { background: #3182ce; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85em; }
 
         /* Admin Box (Disembunyikan secara bawaan / Hidden) */
         .admin-only { display: none; }
@@ -58,6 +92,11 @@
             <h1>Album Kenangan Si Kecil 👶</h1>
             <p>Jurnal tumbuh kembang dan momen berharga</p>
         </header>
+
+        <div id="installBanner" class="install-banner">
+            <span>📱 Pasang aplikasi di HP Anda untuk akses cepat!</span>
+            <button class="btn-install" onclick="installPWA()">Install</button>
+        </div>
 
         <div id="adminPanel" class="admin-only">
             <div class="profile-section">
@@ -107,6 +146,40 @@
         const ADMIN_PASSWORD = "azka23";
 
         let calculatedUsiaText = "";
+        let deferredPrompt;
+
+        // REGISTRASI SERVICE WORKER UNTUK PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    self.addEventListener('install', e => self.skipWaiting());
+                    self.addEventListener('activate', e => self.clients.claim());
+                    self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW error:', err));
+            });
+        }
+
+        // TANGKAP EVENT INSTALL PWA
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').style.display = 'flex';
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('installBanner').style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
 
         // SAAT HALAMAN DIMUAT (TERMASUK REFRESH)
         window.onload = function() {
@@ -144,12 +217,10 @@
             const isCurrentlyAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
 
             if (isCurrentlyAdmin) {
-                // Logout Admin
                 localStorage.setItem('is_admin_logged_in', 'false');
                 showAdminUI(false);
                 alert('Mode Admin telah ditutup.');
             } else {
-                // Login Admin
                 const inputPassword = prompt("Masukkan Password Admin:");
                 if (inputPassword === ADMIN_PASSWORD) {
                     localStorage.setItem('is_admin_logged_in', 'true');
