@@ -5,24 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Album Kenangan Si Kecil 👶✨</title>
     
-    <!-- PWA & Web App Meta Tags -->
-    <meta name="theme-color" content="#ff758c">
+    <meta name="theme-color" content="#3182ce">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Album Kecil">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2922/2922506.png">
 
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Manifest Inline via Data URI -->
     <link rel="manifest" href='data:application/manifest+json,{
         "name": "Album Kenangan Si Kecil",
         "short_name": "Album Kecil",
         "start_url": "./",
         "display": "standalone",
-        "background_color": "#fff5f5",
-        "theme_color": "#ff758c",
+        "background_color": "#f7fafc",
+        "theme_color": "#3182ce",
         "icons": [
             {
                 "src": "https://cdn-icons-png.flaticon.com/512/2922/2922506.png",
@@ -37,15 +35,14 @@
         ]
     }'>
 
-    <!-- Library EXIF JS -->
     <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 
     <style>
         :root {
-            --primary: #ff758c;
-            --primary-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
-            --secondary: #667eea;
-            --bg-color: #fcf8f8;
+            --primary: #3182ce;
+            --primary-gradient: linear-gradient(135deg, #2b6cb0 0%, #4299e1 100%);
+            --secondary: #319795;
+            --bg-color: #f7fafc;
             --card-bg: #ffffff;
             --text-main: #2d3748;
             --text-muted: #718096;
@@ -71,14 +68,48 @@
             background: var(--primary-gradient); 
             color: white;
             border-radius: var(--radius); 
-            margin-bottom: 25px; 
-            box-shadow: 0 10px 25px rgba(255, 117, 140, 0.25); 
+            margin-bottom: 20px; 
+            box-shadow: 0 10px 25px rgba(49, 130, 206, 0.25); 
             position: relative; 
         }
 
         header h1 { font-size: 1.8em; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
         header p { font-size: 0.95em; opacity: 0.9; font-weight: 400; }
         
+        /* Kartu Profil Anak Aktif */
+        .child-info-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        .child-info-card h2 {
+            font-size: 1.4em;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .child-info-card p {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Selector Anak di Depan */
+        .child-select-front {
+            margin-top: 12px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e0;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--text-main);
+            background: #f8fafc;
+        }
+
         /* Tombol Admin Panel */
         .admin-toggle-btn { 
             position: absolute; 
@@ -99,18 +130,18 @@
 
         /* Banner Install PWA */
         .install-banner { 
-            display: none; 
             background: #fff; 
-            border: 2px dashed #ff7eb3; 
+            border: 2px dashed #4299e1; 
             padding: 15px 20px; 
             border-radius: 16px; 
             margin-bottom: 25px; 
             text-align: center; 
+            display: flex;
             align-items: center; 
             justify-content: space-between; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
-        .install-banner span { font-size: 0.9em; font-weight: 600; color: #4a5568; }
+        .install-banner span { font-size: 0.85em; font-weight: 600; color: #4a5568; text-align: left; }
         .btn-install { 
             background: var(--primary-gradient); 
             color: #fff; 
@@ -120,7 +151,8 @@
             font-weight: bold; 
             cursor: pointer; 
             font-size: 0.85em; 
-            box-shadow: 0 4px 10px rgba(255, 117, 140, 0.3);
+            box-shadow: 0 4px 10px rgba(49, 130, 206, 0.3);
+            white-space: nowrap;
         }
 
         /* Admin Box Container */
@@ -140,16 +172,36 @@
             margin-bottom: 20px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.03);
         }
-        .profile-section label { font-size: 0.85em; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .profile-section input { 
-            padding: 12px 16px; 
+        .profile-section h4 {
+            font-size: 1em;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        .profile-section label { font-size: 0.8em; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .profile-section input, .profile-section select { 
+            padding: 10px 14px; 
             border: 2px solid #e2e8f0; 
-            border-radius: 12px; 
-            font-size: 0.95em; 
+            border-radius: 10px; 
+            font-size: 0.9em; 
             width: 100%; 
+            margin-bottom: 12px;
             transition: border-color 0.2s;
         }
-        .profile-section input:focus { outline: none; border-color: var(--primary); }
+        .profile-section input:focus, .profile-section select:focus { outline: none; border-color: var(--primary); }
+
+        .btn-add-child {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85em;
+            cursor: pointer;
+            margin-bottom: 15px;
+            width: 100%;
+        }
 
         /* Form Upload Styling */
         .upload-section { 
@@ -190,7 +242,7 @@
             width: 100%; 
             cursor: pointer; 
             font-size: 1em; 
-            box-shadow: 0 6px 20px rgba(255, 117, 140, 0.35);
+            box-shadow: 0 6px 20px rgba(49, 130, 206, 0.35);
             transition: transform 0.1s, opacity 0.2s;
         }
         .btn-submit:active { transform: scale(0.98); }
@@ -211,7 +263,7 @@
         
         .card-img-container {
             width: 100%;
-            background: #f7fafc;
+            background: #edf2f7;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -232,14 +284,14 @@
             flex-wrap: wrap; 
             gap: 8px; 
             font-size: 0.8em; 
-            color: #b7791f; 
-            background: #fffaf0;
+            color: #2b6cb0; 
+            background: #ebf8ff;
             padding: 8px 12px;
             border-radius: 10px;
             font-weight: 700; 
             margin-bottom: 14px; 
             align-items: center;
-            border: 1px solid #feebc8;
+            border: 1px solid #bee3f8;
         }
 
         .card-title { font-size: 1.25em; color: var(--text-main); margin-bottom: 10px; font-weight: 700; letter-spacing: -0.3px; }
@@ -256,17 +308,17 @@
         .location-tag { font-size: 0.85em; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 4px; }
 
         .btn-download { 
-            background: #48bb78; 
+            background: #319795; 
             color: white; 
             padding: 8px 16px; 
             text-decoration: none; 
             border-radius: 10px; 
             font-size: 0.8em; 
             font-weight: 700; 
-            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.25);
+            box-shadow: 0 4px 12px rgba(49, 151, 149, 0.25);
             transition: background 0.2s;
         }
-        .btn-download:hover { background: #38a169; }
+        .btn-download:hover { background: #2c7a7b; }
         
         /* Tombol Hapus Khusus Admin di Kartu */
         .admin-delete-btn { 
@@ -297,21 +349,40 @@
             <p>Jurnal tumbuh kembang dan momen berharga penuh cinta</p>
         </header>
 
-        <!-- BANNER PROMPT INSTALL PWA -->
-        <div id="installBanner" class="install-banner">
-            <span>📱 Pasang aplikasi di HP Anda untuk akses cepat!</span>
-            <button class="btn-install" onclick="installPWA()">Install</button>
+        <div class="child-info-card">
+            <h2 id="childNameDisplay">👶 Si Kecil</h2>
+            <p id="childParentsDisplay">Buah hati tercinta</p>
+            
+            <label for="selectChildFront" style="font-size: 0.8em; color: var(--text-muted); display: block; margin-top: 10px; font-weight: 600;">PILIH ANGGOTA KELUARGA / ANAK:</label>
+            <select id="selectChildFront" class="child-select-front" onchange="changeActiveChild(this.value)">
+                </select>
         </div>
 
-        <!-- AREA KHUSUS ADMIN -->
+        <div id="installBanner" class="install-banner">
+            <span>📱 Pasang aplikasi di layar utama HP Anda!</span>
+            <button class="btn-install" onclick="installPWA()">Install / Tambah</button>
+        </div>
+
         <div id="adminPanel" class="admin-only">
-            <!-- PENGATURAN TANGGAL LAHIR -->
             <div class="profile-section">
-                <label for="dob">🎂 Tanggal Lahir Anak (Pengaturan Admin):</label>
-                <input type="date" id="dob" onchange="saveDOB()">
+                <h4>⚙️ Kelola Profil Anak (Admin)</h4>
+                
+                <button class="btn-add-child" onclick="addNewChild()">➕ Tambah Anak Baru</button>
+
+                <label for="selectChildAdmin">Pilih Anak yang Diunduh / Diubah:</label>
+                <select id="selectChildAdmin" onchange="changeActiveChild(this.value)">
+                    </select>
+
+                <label for="childName">Nama Anak:</label>
+                <input type="text" id="childName" placeholder="Contoh: Muhammad Azka" onchange="saveCurrentChildProfile()">
+
+                <label for="childParents">Putra/Putri Dari (Pasangan):</label>
+                <input type="text" id="childParents" placeholder="Contoh: Pasangan Budi & Siti" onchange="saveCurrentChildProfile()">
+
+                <label for="dob">🎂 Tanggal Lahir Anak:</label>
+                <input type="date" id="dob" onchange="saveCurrentChildProfile()">
             </div>
 
-            <!-- FORM UPLOAD FOTO BARU -->
             <div class="upload-section">
                 <h3>➕ Tambah Kenangan Baru</h3>
                 <form id="uploadForm">
@@ -355,6 +426,12 @@
         let calculatedUsiaText = "";
         let deferredPrompt;
 
+        // DATA MULTI ANAK
+        let childrenData = JSON.parse(localStorage.getItem('children_data')) || [
+            { id: '1', name: 'Si Kecil', parents: '', dob: '' }
+        ];
+        let activeChildId = localStorage.getItem('active_child_id') || childrenData[0].id;
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `
@@ -371,7 +448,6 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            document.getElementById('installBanner').style.display = 'flex';
         });
 
         function installPWA() {
@@ -383,14 +459,14 @@
                     }
                     deferredPrompt = null;
                 });
+            } else {
+                alert("Petunjuk Install Manual:\n\n- Android (Chrome): Ketuk titik tiga (⋮) di kanan atas -> Pilih 'Tambahkan ke Layar Utama' / 'Instal aplikasi'.\n\n- iPhone (Safari): Ketuk tombol Bagikan (Share ⬆️) -> Pilih 'Tambahkan ke Layar Utama' (Add to Home Screen).");
             }
         }
 
         window.onload = function() {
-            const savedDOB = localStorage.getItem('child_dob');
-            if (savedDOB) {
-                document.getElementById('dob').value = savedDOB;
-            }
+            renderChildDropdowns();
+            loadCurrentChildProfile();
 
             const isSavedAdmin = localStorage.getItem('is_admin_logged_in');
             if (isSavedAdmin === 'true') {
@@ -399,6 +475,86 @@
 
             loadAlbum();
         };
+
+        function renderChildDropdowns() {
+            const frontSelect = document.getElementById('selectChildFront');
+            const adminSelect = document.getElementById('selectChildAdmin');
+
+            frontSelect.innerHTML = '';
+            adminSelect.innerHTML = '';
+
+            childrenData.forEach(child => {
+                const opt1 = document.createElement('option');
+                opt1.value = child.id;
+                opt1.innerText = child.name || 'Si Kecil';
+                if (child.id === activeChildId) opt1.selected = true;
+                frontSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = child.id;
+                opt2.innerText = child.name || 'Si Kecil';
+                if (child.id === activeChildId) opt2.selected = true;
+                adminSelect.appendChild(opt2);
+            });
+        }
+
+        function addNewChild() {
+            const name = prompt("Masukkan nama anak baru:");
+            if (!name) return;
+
+            const newChild = {
+                id: Date.now().toString(),
+                name: name,
+                parents: '',
+                dob: ''
+            };
+
+            childrenData.push(newChild);
+            activeChildId = newChild.id;
+
+            saveAllChildrenData();
+            renderChildDropdowns();
+            loadCurrentChildProfile();
+            alert(`Anak "${name}" berhasil ditambahkan!`);
+        }
+
+        function changeActiveChild(id) {
+            activeChildId = id;
+            localStorage.setItem('active_child_id', activeChildId);
+            renderChildDropdowns();
+            loadCurrentChildProfile();
+        }
+
+        function loadCurrentChildProfile() {
+            const child = childrenData.find(c => c.id === activeChildId) || childrenData[0];
+
+            document.getElementById('childName').value = child.name || '';
+            document.getElementById('childParents').value = child.parents || '';
+            document.getElementById('dob').value = child.dob || '';
+
+            document.getElementById('childNameDisplay').innerText = child.name ? `👶 ${child.name}` : "👶 Si Kecil";
+            document.getElementById('childParentsDisplay').innerText = child.parents ? `Putra/Putri dari: ${child.parents}` : "Buah hati tercinta";
+
+            calculateAutoAge();
+        }
+
+        function saveCurrentChildProfile() {
+            const childIndex = childrenData.findIndex(c => c.id === activeChildId);
+            if (childIndex !== -1) {
+                childrenData[childIndex].name = document.getElementById('childName').value;
+                childrenData[childIndex].parents = document.getElementById('childParents').value;
+                childrenData[childIndex].dob = document.getElementById('dob').value;
+
+                saveAllChildrenData();
+                renderChildDropdowns();
+                loadCurrentChildProfile();
+            }
+        }
+
+        function saveAllChildrenData() {
+            localStorage.setItem('children_data', JSON.stringify(childrenData));
+            localStorage.setItem('active_child_id', activeChildId);
+        }
 
         function showAdminUI(isLoggedIn) {
             const adminPanel = document.getElementById('adminPanel');
@@ -472,19 +628,13 @@
             });
         }
 
-        function saveDOB() {
-            const dobValue = document.getElementById('dob').value;
-            localStorage.setItem('child_dob', dobValue);
-            calculateAutoAge();
-        }
-
         function calculateAutoAge() {
             const dobInput = document.getElementById('dob').value;
             const photoDateInput = document.getElementById('tanggalFoto').value;
             const ageDisplay = document.getElementById('calculatedAge');
 
             if (!dobInput) {
-                ageDisplay.innerText = "⚠️ Harap isi tanggal lahir anak di atas terlebih dahulu.";
+                ageDisplay.innerText = "⚠️ Harap isi tanggal lahir anak di pengaturan admin terlebih dahulu.";
                 calculatedUsiaText = "";
                 return;
             }
