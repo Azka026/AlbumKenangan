@@ -13,7 +13,7 @@
     <meta name="apple-mobile-web-app-title" content="Album Kecil">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2922/2922506.png">
 
-    <!-- Memanggil File Manifest Asli -->
+    <!-- Memanggil File Manifest -->
     <link rel="manifest" href="./manifest.json">
 
     <!-- Google Fonts -->
@@ -201,7 +201,7 @@
         /* Grid Layout Jika Banyak Foto */
         .photo-gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 6px;
             background: #e2e8f0;
             padding: 4px;
@@ -216,7 +216,7 @@
             overflow: hidden;
             cursor: pointer;
             position: relative;
-            height: 250px;
+            height: 220px;
         }
 
         .single-photo .card-img-container {
@@ -386,7 +386,6 @@
                 <h3>➕ Tambah Kenangan Baru</h3>
                 <form id="uploadForm">
                     <div class="form-group">
-                        <!-- MENAMBAHKAN MULTIPLE DI SINI -->
                         <label>Pilih Foto Original (Bisa Pilih Beberapa Foto):</label>
                         <input type="file" id="fotoFile" accept="image/*" multiple onchange="detectPhotoDate(this)" required>
                         <span id="exifNotice" class="exif-info"></span>
@@ -692,7 +691,6 @@
                     const cleanFileId = fileId ? fileId.trim() : '';
                     if (!cleanFileId) return;
 
-                    // MENDUKUNG PISAHAN BEBERAPA FOTO (SEPARATED BY COMMA)
                     const fileIds = cleanFileId.split(',').map(s => s.trim()).filter(Boolean);
                     const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
 
@@ -764,7 +762,7 @@
             }
         }
 
-        function compressImage(file, maxWidth = 1600, quality = 0.8) {
+        function compressImage(file, maxWidth = 1200, quality = 0.7) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -791,7 +789,7 @@
             });
         }
 
-        // PROSES UPLOAD MULTIPLE FILE
+        // PROSES UPLOAD MULTIPLE FOTO TERGABUNG DALAM 1 KENANGAN
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
@@ -805,37 +803,74 @@
             try {
                 const rawDate = document.getElementById('tanggalFoto').value;
                 const formattedDate = formatDateIndo(rawDate);
+                
+                let uploadedFileIds = [];
+                let firstBase64 = "";
 
+                // 1. Loop kompresi dan upload foto satu per satu ke Drive
                 for (let i = 0; i < files.length; i++) {
-                    btn.innerText = `⏳ Mengunggah foto (${i + 1} dari ${files.length})...`;
+                    btn.innerText = `⏳ Memproses & Mengunggah foto (${i + 1} dari ${files.length})...`;
                     
-                    const base64Data = await compressImage(files[i]);
+                    // Kompres foto (Maksimal lebar 1200px agar ringan & cepat)
+                    const base64Data = await compressImage(files[i], 1200, 0.7);
 
-                    const payload = {
+                    if (i === 0) firstBase64 = base64Data;
+
+                    const uploadPayload = {
+                        action: "uploadOnly",
                         fileName: files[i].name.replace(/\.[^/.]+$/, "") + ".jpg",
                         mimeType: "image/jpeg",
-                        fileData: base64Data,
-                        judul: document.getElementById('judul').value,
-                        tanggal: formattedDate,
-                        usia: calculatedUsiaText,
-                        lokasi: document.getElementById('lokasi').value,
-                        cerita: document.getElementById('cerita').value
+                        fileData: base64Data
                     };
 
-                    await fetch(WEB_APP_URL, {
+                    const response = await fetch(WEB_APP_URL, {
                         method: 'POST',
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(uploadPayload)
                     });
+
+                    const resData = await response.json();
+                    if (resData.result === 'success' && resData.fileId) {
+                        uploadedFileIds.push(resData.fileId);
+                    } else {
+                        throw new Error("Gagal mengunggah foto ke-" + (i + 1));
+                    }
                 }
 
-                alert("🎉 Semua kenangan berhasil disimpan!");
-                document.getElementById('uploadForm').reset();
-                document.getElementById('calculatedAge').innerText = "";
-                document.getElementById('exifNotice').innerText = "";
-                loadAlbum();
+                // 2. Simpan 1 baris data kenangan ke Google Sheets yang berisi semua ID Foto
+                btn.innerText = `💾 Menyimpan kenangan ke Google Sheets...`;
+
+                const finalPayload = {
+                    action: "saveData",
+                    fileName: files[0].name,
+                    mimeType: "image/jpeg",
+                    fileData: firstBase64,
+                    fileId: uploadedFileIds.join(','), // Gabungkan semua ID foto dipisah koma
+                    judul: document.getElementById('judul').value,
+                    tanggal: formattedDate,
+                    usia: calculatedUsiaText,
+                    lokasi: document.getElementById('lokasi').value,
+                    cerita: document.getElementById('cerita').value
+                };
+
+                const finalResponse = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(finalPayload)
+                });
+
+                const finalData = await finalResponse.json();
+
+                if (finalData.result === 'success') {
+                    alert("🎉 Berhasil! " + files.length + " foto disimpan dalam 1 kenangan.");
+                    document.getElementById('uploadForm').reset();
+                    document.getElementById('calculatedAge').innerText = "";
+                    document.getElementById('exifNotice').innerText = "";
+                    loadAlbum();
+                } else {
+                    alert("Gagal menyimpan data ke Spreadsheet.");
+                }
 
             } catch (err) {
-                alert("Terjadi kesalahan koneksi saat mengunggah.");
+                alert("Terjadi kesalahan saat mengunggah: " + err.message);
                 console.error(err);
             } finally {
                 btn.disabled = false;
