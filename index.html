@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Album Kenangan Si Kecil</title>
+    <!-- Library untuk membaca metadata EXIF tanggal foto -->
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: #f8f9fa; color: #333; padding: 20px 15px; }
@@ -32,6 +34,7 @@
         .form-group textarea { resize: vertical; height: 80px; }
         
         .auto-age-preview { font-size: 0.85em; color: #dd6b20; font-weight: bold; margin-top: 5px; display: block; }
+        .exif-info { font-size: 0.8em; color: #38a169; font-weight: bold; margin-top: 3px; display: block; }
         
         .btn-submit { background: #3182ce; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1em; }
         .btn-submit:disabled { background: #a0aec0; }
@@ -57,7 +60,7 @@
             <p>Jurnal tumbuh kembang dan momen berharga</p>
         </header>
 
-        <!-- AREA KHUSUS ADMIN (Hanya Muncul Jika Password Benar) -->
+        <!-- AREA KHUSUS ADMIN -->
         <div id="adminPanel" class="admin-only">
             <!-- PENGATURAN TANGGAL LAHIR -->
             <div class="profile-section">
@@ -71,7 +74,8 @@
                 <form id="uploadForm">
                     <div class="form-group">
                         <label>Pilih Foto Original:</label>
-                        <input type="file" id="fotoFile" accept="image/*" required>
+                        <input type="file" id="fotoFile" accept="image/*" onchange="detectPhotoDate(this)" required>
+                        <span id="exifNotice" class="exif-info"></span>
                     </div>
                     <div class="form-group">
                         <label>Judul Momen:</label>
@@ -103,13 +107,12 @@
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyPnGEIqaz7f-qJBmWNG-C413ocfU_D4lAzSZlXQW87CV5NJEnDGatsHQ5fMHDRRgmD/exec';
 
-        // PASSWORD ADMIN (Diubah menjadi azka23)
+        // PASSWORD ADMIN
         const ADMIN_PASSWORD = "azka23";
 
         let calculatedUsiaText = "";
         let isAdminLoggedIn = false;
 
-        // Cek login admin & load album saat pertama buka
         window.onload = function() {
             const savedDOB = localStorage.getItem('child_dob');
             if (savedDOB) {
@@ -118,19 +121,57 @@
             loadAlbum();
         };
 
+        // FUNGSI DETEKSI TANGGAL FOTO OTOMATIS (Membaca EXIF Meta)
+        function detectPhotoDate(input) {
+            const file = input.files[0];
+            const exifNotice = document.getElementById('exifNotice');
+            const tanggalFotoInput = document.getElementById('tanggalFoto');
+
+            if (!file) return;
+
+            exifNotice.innerText = "🔍 Membaca tanggal dari foto...";
+
+            EXIF.getData(file, function() {
+                const dateTime = EXIF.getTag(this, "DateTimeOriginal") || EXIF.getTag(this, "DateTime");
+                
+                if (dateTime) {
+                    // Format EXIF biasanya: "YYYY:MM:DD HH:MM:SS"
+                    const parts = dateTime.split(" ")[0].split(":");
+                    if (parts.length === 3) {
+                        const formattedDate = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                        tanggalFotoInput.value = formattedDate;
+                        exifNotice.innerText = "✨ Tanggal pengambilan foto berhasil terdeteksi otomatis!";
+                        calculateAutoAge(); // Langsung hitung usia otomatis
+                        return;
+                    }
+                }
+
+                // Jika EXIF tidak ditemukan, ambil dari Last Modified tanggal file lokal HP/PC
+                if (file.lastModified) {
+                    const fileDate = new Date(file.lastModified);
+                    const year = fileDate.getFullYear();
+                    const month = String(fileDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(fileDate.getDate()).padStart(2, '0');
+                    tanggalFotoInput.value = `${year}-${month}-${day}`;
+                    exifNotice.innerText = "ℹ️ Tanggal diambil dari waktu simpan file foto.";
+                    calculateAutoAge();
+                } else {
+                    exifNotice.innerText = "⚠️ Tanggal foto tidak ditemukan. Silakan isi tanggal secara manual.";
+                }
+            });
+        }
+
         // FUNGSI TOGGLE MODE ADMIN
         function toggleAdminMode() {
             const adminPanel = document.getElementById('adminPanel');
             const adminBtn = document.getElementById('adminBtn');
 
             if (isAdminLoggedIn) {
-                // Logout Admin
                 isAdminLoggedIn = false;
                 adminPanel.style.display = 'none';
                 adminBtn.innerText = '🔒 Admin';
                 alert('Mode Admin telah ditutup.');
             } else {
-                // Login Admin
                 const inputPassword = prompt("Masukkan Password Admin:");
                 if (inputPassword === ADMIN_PASSWORD) {
                     isAdminLoggedIn = true;
@@ -290,6 +331,7 @@
                         alert("🎉 Kenangan berhasil disimpan!");
                         document.getElementById('uploadForm').reset();
                         document.getElementById('calculatedAge').innerText = "";
+                        document.getElementById('exifNotice').innerText = "";
                         loadAlbum();
                     } else {
                         alert("Gagal mengunggah: " + res.error);
