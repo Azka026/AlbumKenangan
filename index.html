@@ -10,6 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Album Kecil">
+    <meta name="application-name" content="Album Kecil">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2922/2922506.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,20 +18,24 @@
     <link rel="manifest" href='data:application/manifest+json,{
         "name": "Album Kenangan Si Kecil",
         "short_name": "Album Kecil",
+        "description": "Jurnal tumbuh kembang dan momen berharga anak",
         "start_url": "./",
         "display": "standalone",
+        "orientation": "portrait",
         "background_color": "#f7fafc",
         "theme_color": "#3182ce",
         "icons": [
             {
                 "src": "https://cdn-icons-png.flaticon.com/512/2922/2922506.png",
                 "sizes": "192x192",
-                "type": "image/png"
+                "type": "image/png",
+                "purpose": "any maskable"
             },
             {
                 "src": "https://cdn-icons-png.flaticon.com/512/2922/2922506.png",
                 "sizes": "512x512",
-                "type": "image/png"
+                "type": "image/png",
+                "purpose": "any maskable"
             }
         ]
     }'>
@@ -57,6 +62,7 @@
             color: var(--text-main); 
             padding: 20px 15px; 
             min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .container { max-width: 750px; margin: 0 auto; }
@@ -98,7 +104,6 @@
             line-height: 1.5;
         }
 
-        /* Selector Anak di Depan */
         .child-select-front {
             margin-top: 12px;
             padding: 8px 14px;
@@ -108,6 +113,8 @@
             font-weight: 600;
             color: var(--text-main);
             background: #f8fafc;
+            width: 100%;
+            max-width: 300px;
         }
 
         /* Tombol Admin Panel */
@@ -127,33 +134,6 @@
             transition: all 0.2s;
         }
         .admin-toggle-btn:hover { background: rgba(255, 255, 255, 0.4); }
-
-        /* Banner Install PWA */
-        .install-banner { 
-            background: #fff; 
-            border: 2px dashed #4299e1; 
-            padding: 15px 20px; 
-            border-radius: 16px; 
-            margin-bottom: 25px; 
-            text-align: center; 
-            display: flex;
-            align-items: center; 
-            justify-content: space-between; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        }
-        .install-banner span { font-size: 0.85em; font-weight: 600; color: #4a5568; text-align: left; }
-        .btn-install { 
-            background: var(--primary-gradient); 
-            color: #fff; 
-            border: none; 
-            padding: 8px 16px; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 0.85em; 
-            box-shadow: 0 4px 10px rgba(49, 130, 206, 0.3);
-            white-space: nowrap;
-        }
 
         /* Admin Box Container */
         .admin-only { display: none; animation: fadeIn 0.3s ease; }
@@ -353,14 +333,9 @@
             <h2 id="childNameDisplay">👶 Si Kecil</h2>
             <p id="childParentsDisplay">Buah hati tercinta</p>
             
-            <label for="selectChildFront" style="font-size: 0.8em; color: var(--text-muted); display: block; margin-top: 10px; font-weight: 600;">PILIH ANGGOTA KELUARGA / ANAK:</label>
+            <label for="selectChildFront" style="font-size: 0.8em; color: var(--text-muted); display: block; margin-top: 12px; font-weight: 600;">PILIH ANGGOTA KELUARGA / ANAK:</label>
             <select id="selectChildFront" class="child-select-front" onchange="changeActiveChild(this.value)">
                 </select>
-        </div>
-
-        <div id="installBanner" class="install-banner">
-            <span>📱 Pasang aplikasi di layar utama HP Anda!</span>
-            <button class="btn-install" onclick="installPWA()">Install / Tambah</button>
         </div>
 
         <div id="adminPanel" class="admin-only">
@@ -369,7 +344,7 @@
                 
                 <button class="btn-add-child" onclick="addNewChild()">➕ Tambah Anak Baru</button>
 
-                <label for="selectChildAdmin">Pilih Anak yang Diunduh / Diubah:</label>
+                <label for="selectChildAdmin">Pilih Anak yang Diubah:</label>
                 <select id="selectChildAdmin" onchange="changeActiveChild(this.value)">
                     </select>
 
@@ -424,7 +399,6 @@
         const ADMIN_PASSWORD = "azka23";
 
         let calculatedUsiaText = "";
-        let deferredPrompt;
 
         // DATA MULTI ANAK
         let childrenData = JSON.parse(localStorage.getItem('children_data')) || [
@@ -432,6 +406,7 @@
         ];
         let activeChildId = localStorage.getItem('active_child_id') || childrenData[0].id;
 
+        // REGISTRASI SERVICE WORKER OTOMATIS
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `
@@ -443,25 +418,6 @@
                 const swUrl = URL.createObjectURL(blob);
                 navigator.serviceWorker.register(swUrl).catch(err => console.log('SW error:', err));
             });
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
-
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        document.getElementById('installBanner').style.display = 'none';
-                    }
-                    deferredPrompt = null;
-                });
-            } else {
-                alert("Petunjuk Install Manual:\n\n- Android (Chrome): Ketuk titik tiga (⋮) di kanan atas -> Pilih 'Tambahkan ke Layar Utama' / 'Instal aplikasi'.\n\n- iPhone (Safari): Ketuk tombol Bagikan (Share ⬆️) -> Pilih 'Tambahkan ke Layar Utama' (Add to Home Screen).");
-            }
         }
 
         window.onload = function() {
