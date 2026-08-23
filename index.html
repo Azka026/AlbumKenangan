@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Album Kenangan Si Kecil 👶✨</title>
     
+    <!-- PWA Meta Tags untuk Aplikasi Mobile / APK -->
     <meta name="theme-color" content="#3182ce">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,8 +14,10 @@
     <meta name="application-name" content="Album Kecil">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2922/2922506.png">
 
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- PWA Manifest Inline -->
     <link rel="manifest" href='data:application/manifest+json,{
         "name": "Album Kenangan Si Kecil",
         "short_name": "Album Kecil",
@@ -40,6 +43,7 @@
         ]
     }'>
 
+    <!-- Library EXIF JS -->
     <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 
     <style>
@@ -248,6 +252,8 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            cursor: pointer; /* Indikasi bahwa gambar bisa diklik */
+            position: relative;
         }
 
         .card-img { 
@@ -255,6 +261,26 @@
             max-height: 600px; 
             object-fit: contain; 
             display: block; 
+            transition: transform 0.3s ease;
+        }
+        
+        .card-img-container:hover .card-img {
+            transform: scale(1.02);
+        }
+
+        /* Overlay petunjuk klik pada foto */
+        .card-img-container::after {
+            content: "🔍 Klik untuk memperbesar";
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            pointer-events: none;
+            opacity: 0.8;
         }
         
         .card-body { padding: 22px; }
@@ -318,6 +344,49 @@
         .admin-delete-btn:hover { background: #e53e3e; color: white; }
 
         .status-msg { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500; }
+
+        /* MODAL / FULLSCREEN IMAGE VIEWER */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            animation: fadeInModal 0.25s ease;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            max-width: 95%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            color: #fff;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10000;
+            line-height: 1;
+            user-select: none;
+        }
+        .modal-close:hover { color: #e2e8f0; }
     </style>
 </head>
 <body>
@@ -329,16 +398,20 @@
             <p>Jurnal tumbuh kembang dan momen berharga penuh cinta</p>
         </header>
 
+        <!-- KARTU INFORMASI ANAK (DEPAN) -->
         <div class="child-info-card">
             <h2 id="childNameDisplay">👶 Si Kecil</h2>
             <p id="childParentsDisplay">Buah hati tercinta</p>
             
             <label for="selectChildFront" style="font-size: 0.8em; color: var(--text-muted); display: block; margin-top: 12px; font-weight: 600;">PILIH ANGGOTA KELUARGA / ANAK:</label>
             <select id="selectChildFront" class="child-select-front" onchange="changeActiveChild(this.value)">
-                </select>
+                <!-- Option diisi lewat JS -->
+            </select>
         </div>
 
+        <!-- AREA KHUSUS ADMIN -->
         <div id="adminPanel" class="admin-only">
+            <!-- PENGATURAN INFORMASI ANAK -->
             <div class="profile-section">
                 <h4>⚙️ Kelola Profil Anak (Admin)</h4>
                 
@@ -346,7 +419,8 @@
 
                 <label for="selectChildAdmin">Pilih Anak yang Diubah:</label>
                 <select id="selectChildAdmin" onchange="changeActiveChild(this.value)">
-                    </select>
+                    <!-- Option diisi lewat JS -->
+                </select>
 
                 <label for="childName">Nama Anak:</label>
                 <input type="text" id="childName" placeholder="Contoh: Muhammad Azka" onchange="saveCurrentChildProfile()">
@@ -358,6 +432,7 @@
                 <input type="date" id="dob" onchange="saveCurrentChildProfile()">
             </div>
 
+            <!-- FORM UPLOAD FOTO BARU -->
             <div class="upload-section">
                 <h3>➕ Tambah Kenangan Baru</h3>
                 <form id="uploadForm">
@@ -390,6 +465,12 @@
 
         <h3 class="section-title">📸 Galeri Kenangan</h3>
         <div id="album-list" class="status-msg">Memuat album kenangan... ✨</div>
+    </div>
+
+    <!-- MODAL / FULLSCREEN VIEWER -->
+    <div id="imageModal" class="image-modal" onclick="closeModal()">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImg">
     </div>
 
     <script>
@@ -431,6 +512,18 @@
 
             loadAlbum();
         };
+
+        /* FUNGSI BUKA & TUTUP MODAL FULLSCREEN FOTO */
+        function openModal(imgSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImg');
+            modalImg.src = imgSrc;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
 
         function renderChildDropdowns() {
             const frontSelect = document.getElementById('selectChildFront');
@@ -692,7 +785,7 @@
 
                     albumList.innerHTML += `
                         <div class="card" id="card-${id}">
-                            <div class="card-img-container">
+                            <div class="card-img-container" onclick="openModal('${imageUrl}')">
                                 <img class="card-img" src="${imageUrl}" alt="${judul}" loading="lazy">
                             </div>
                             <div class="card-body">
