@@ -530,7 +530,9 @@
             container.innerText = "Memuat album kenangan... ✨";
 
             try {
-                const response = await fetch(SHEET_CSV_URL + '&t=' + new Date().getTime());
+                // Parameter anti-cache ganda agar browser dan Google Sheets selalu merespons data terbaru
+                const antiCacheUrl = SHEET_CSV_URL + '&t=' + new Date().getTime() + '&nocache=' + Math.random();
+                const response = await fetch(antiCacheUrl);
                 const csvText = await response.text();
                 const rows = parseCSV(csvText);
 
@@ -728,10 +730,13 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: 'delete', id: id })
                 });
-                alert("Kenangan berhasil dihapus! ✨");
-                setTimeout(loadAlbum, 3500);
+                
+                alert("Perintah hapus dikirim. Memperbarui galeri...");
+                // Jeda 3 detik agar Google Spreadsheet selesai membersihkan baris secara fisik
+                setTimeout(loadAlbum, 3000);
             } catch (err) {
                 alert("Gagal menghapus.");
+                console.error(err);
             }
         }
     </script>
