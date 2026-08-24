@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Album Kenangan Si Kecil 👶✨</title>
     
-    <!-- Meta Tags PWA -->
     <meta name="theme-color" content="#3182ce">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,13 +12,8 @@
     <meta name="apple-mobile-web-app-title" content="Album Kecil">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2922/2922506.png">
 
-    <!-- Memanggil File Manifest -->
     <link rel="manifest" href="./manifest.json">
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Library EXIF JS -->
     <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 
     <style>
@@ -101,7 +95,6 @@
             font-weight: 600; 
             transition: all 0.2s;
         }
-        .admin-toggle-btn:hover { background: rgba(255, 255, 255, 0.4); }
 
         .admin-only { display: none; animation: fadeIn 0.3s ease; }
         
@@ -181,7 +174,6 @@
             font-size: 1em; 
             box-shadow: 0 6px 20px rgba(49, 130, 206, 0.35);
         }
-        .btn-submit:active { transform: scale(0.98); }
         .btn-submit:disabled { background: #cbd5e0; box-shadow: none; cursor: not-allowed; }
 
         .section-title { font-size: 1.3em; color: var(--text-main); margin-bottom: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
@@ -215,21 +207,9 @@
             height: 220px;
         }
 
-        .single-photo .card-img-container {
-            height: auto;
-            max-height: 550px;
-        }
-
-        .card-img { 
-            width: 100%; 
-            height: 100%;
-            object-fit: cover; 
-            display: block; 
-            transition: transform 0.3s ease;
-        }
-
+        .single-photo .card-img-container { height: auto; max-height: 550px; }
+        .card-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease; }
         .single-photo .card-img { object-fit: contain; }
-        .card-img-container:hover .card-img { transform: scale(1.03); }
 
         .card-body { padding: 22px; }
         
@@ -251,124 +231,40 @@
         .card-title { font-size: 1.25em; color: var(--text-main); margin-bottom: 10px; font-weight: 700; }
         .card-story { line-height: 1.7; color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; white-space: pre-line; }
         
-        .card-footer { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-top: 1px solid #edf2f7; 
-            padding-top: 15px; 
-        }
-        
+        .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #edf2f7; padding-top: 15px; }
         .location-tag { font-size: 0.85em; color: var(--text-muted); font-weight: 500; }
         
-        .admin-action-box {
-            display: none;
-            margin-top: 15px;
-            border-top: 1px dashed #cbd5e0;
-            padding-top: 15px;
-        }
+        .admin-action-box { display: none; margin-top: 15px; border-top: 1px dashed #cbd5e0; padding-top: 15px; }
 
         .admin-sub-btn {
-            background: #e6fffa;
-            color: #234e52;
-            border: 1px solid #b2f5ea;
-            padding: 8px 14px;
-            border-radius: 10px;
-            font-size: 0.8em;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 8px;
+            background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea;
+            padding: 8px 14px; border-radius: 10px; font-size: 0.8em; font-weight: 700;
+            cursor: pointer; width: 100%; margin-bottom: 8px;
         }
 
         .admin-delete-btn { 
-            background: #fff5f5; 
-            color: #e53e3e; 
-            border: 1px solid #feb2b2; 
-            padding: 8px 14px; 
-            border-radius: 10px; 
-            font-size: 0.8em; 
-            font-weight: 700; 
-            cursor: pointer; 
-            width: 100%;
+            background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; 
+            padding: 8px 14px; border-radius: 10px; font-size: 0.8em; font-weight: 700; 
+            cursor: pointer; width: 100%;
         }
 
         .status-msg { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500; }
 
-        /* MODAL FULLSCREEN SLIDER */
         .image-modal {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            left: 0; top: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.92);
-            backdrop-filter: blur(8px);
-            align-items: center;
-            justify-content: center;
-            touch-action: pan-y;
+            display: none; position: fixed; z-index: 9999; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(8px); align-items: center; justify-content: center;
         }
-        .modal-content { 
-            max-width: 95%; 
-            max-height: 85vh; 
-            object-fit: contain; 
-            border-radius: 12px;
-            transition: transform 0.2s ease-out;
-            user-select: none;
-        }
-        .modal-close { 
-            position: absolute; 
-            top: 20px; 
-            right: 25px; 
-            color: #fff; 
-            font-size: 35px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            z-index: 10001; 
-        }
+        .modal-content { max-width: 95%; max-height: 85vh; object-fit: contain; border-radius: 12px; }
+        .modal-close { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; z-index: 10001; }
         .modal-nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            font-size: 24px;
-            padding: 12px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 10000;
-            user-select: none;
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2); color: white; border: none;
+            font-size: 24px; padding: 12px; border-radius: 50%; cursor: pointer; z-index: 10000;
         }
         .modal-nav-prev { left: 15px; }
         .modal-nav-next { right: 15px; }
-        .modal-counter {
-            position: absolute;
-            bottom: 20px;
-            color: white;
-            font-size: 0.9em;
-            font-weight: 600;
-            background: rgba(0,0,0,0.5);
-            padding: 5px 15px;
-            border-radius: 20px;
-        }
-
-        .pwa-install-banner {
-            display: none;
-            position: fixed;
-            bottom: 15px; left: 50%;
-            transform: translateX(-50%);
-            width: 92%; max-width: 500px;
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 14px 18px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            border: 1px solid #e2e8f0;
-            z-index: 9998;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .btn-pwa-install { background: var(--primary-gradient); color: white; border: none; padding: 9px 15px; border-radius: 10px; font-weight: 700; font-size: 0.8em; cursor: pointer; }
+        .modal-counter { position: absolute; bottom: 20px; color: white; font-size: 0.9em; font-weight: 600; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; }
     </style>
 </head>
 <body>
@@ -440,10 +336,8 @@
         <div id="album-list" class="status-msg">Memuat album kenangan... ✨</div>
     </div>
 
-    <!-- Hidden file input untuk menambah foto ke kenangan lama -->
     <input type="file" id="additionalPhotoInput" accept="image/*" multiple style="display:none" onchange="handleAdditionalPhotos(this)">
 
-    <!-- MODAL FULLSCREEN SLIDER -->
     <div id="imageModal" class="image-modal">
         <span class="modal-close" onclick="closeModal()">&times;</span>
         <button class="modal-nav-btn modal-nav-prev" id="btnPrev" onclick="prevImage(event)">❮</button>
@@ -452,55 +346,23 @@
         <div class="modal-counter" id="modalCounter"></div>
     </div>
 
-    <div id="pwaBanner" class="pwa-install-banner">
-        <div>
-            <h5 style="font-size:0.9em;">Album Si Kecil</h5>
-            <p style="font-size:0.75em; color:#718096;">Pasang di layar utama HP Anda</p>
-        </div>
-        <button class="btn-pwa-install" onclick="installApp()">Jadikan Aplikasi</button>
-    </div>
-
     <script>
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwHf7HO08TYo1OZ2EVw8camXvDy2MXygyiEnyPWOZjqUK0h93Hti4D45J7D9TEKujnWkA/exec';
+        
+        // URL Apps Script Baru
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby4EiH2AxOYaGX3DDpri-3Fhw_VG8LW54Kz9b7PHJQOxNGr4mheifOE7dO8ECytzRkybw/exec';
         const ADMIN_PASSWORD = "azka23";
 
         let calculatedUsiaText = "";
-        let deferredPrompt = null;
         let targetCardIdForAdd = null;
 
-        // Variabel Navigasi Modal Lightbox
         let currentImageGroup = [];
         let currentImageIndex = 0;
-        let touchStartX = 0;
-        let touchEndX = 0;
 
         let childrenData = JSON.parse(localStorage.getItem('children_data')) || [
             { id: '1', name: 'Si Kecil', parents: '', dob: '' }
         ];
         let activeChildId = localStorage.getItem('active_child_id') || childrenData[0].id;
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Gagal:', err));
-            });
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            if (!localStorage.getItem('pwa_banner_dismissed')) {
-                document.getElementById('pwaBanner').style.display = 'flex';
-            }
-        });
-
-        async function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt = null;
-                document.getElementById('pwaBanner').style.display = 'none';
-            }
-        }
 
         window.onload = function() {
             renderChildDropdowns();
@@ -509,15 +371,12 @@
                 showAdminUI(true);
             }
             loadAlbum();
-            setupSwipeEvents();
         };
 
-        // OPEN MODAL SLIDER
         function openModalGroup(fileIdsStr, startIndex) {
             const ids = fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
             currentImageGroup = ids.map(id => `https://lh3.googleusercontent.com/d/${id}`);
             currentImageIndex = startIndex;
-            
             updateModalView();
             document.getElementById('imageModal').style.display = 'flex';
         }
@@ -525,7 +384,6 @@
         function updateModalView() {
             const img = document.getElementById('modalImg');
             img.src = currentImageGroup[currentImageIndex];
-            
             const prevBtn = document.getElementById('btnPrev');
             const nextBtn = document.getElementById('btnNext');
             const counter = document.getElementById('modalCounter');
@@ -542,77 +400,21 @@
             }
         }
 
-        function prevImage(e) {
-            if (e) e.stopPropagation();
-            if (currentImageIndex > 0) {
-                currentImageIndex--;
-            } else {
-                currentImageIndex = currentImageGroup.length - 1;
-            }
-            updateModalView();
-        }
-
-        function nextImage(e) {
-            if (e) e.stopPropagation();
-            if (currentImageIndex < currentImageGroup.length - 1) {
-                currentImageIndex++;
-            } else {
-                currentImageIndex = 0;
-            }
-            updateModalView();
-        }
-
-        function closeModal() {
-            document.getElementById('imageModal').style.display = 'none';
-        }
-
-        function setupSwipeEvents() {
-            const modal = document.getElementById('imageModal');
-            
-            modal.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].screenX;
-            }, { passive: true });
-
-            modal.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
-                handleSwipe();
-            }, { passive: true });
-
-            document.addEventListener('keydown', (e) => {
-                if (modal.style.display === 'flex') {
-                    if (e.key === 'ArrowLeft') prevImage();
-                    if (e.key === 'ArrowRight') nextImage();
-                    if (e.key === 'Escape') closeModal();
-                }
-            });
-        }
-
-        function handleSwipe() {
-            const swipeThreshold = 50;
-            if (touchEndX < touchStartX - swipeThreshold) {
-                nextImage();
-            }
-            if (touchEndX > touchStartX + swipeThreshold) {
-                prevImage();
-            }
-        }
+        function prevImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex > 0) ? currentImageIndex - 1 : currentImageGroup.length - 1; updateModalView(); }
+        function nextImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex < currentImageGroup.length - 1) ? currentImageIndex + 1 : 0; updateModalView(); }
+        function closeModal() { document.getElementById('imageModal').style.display = 'none'; }
 
         function renderChildDropdowns() {
             const frontSelect = document.getElementById('selectChildFront');
             const adminSelect = document.getElementById('selectChildAdmin');
-            frontSelect.innerHTML = '';
-            adminSelect.innerHTML = '';
+            frontSelect.innerHTML = ''; adminSelect.innerHTML = '';
 
             childrenData.forEach(child => {
-                const opt1 = document.createElement('option');
-                opt1.value = child.id;
-                opt1.innerText = child.name || 'Si Kecil';
+                const opt1 = document.createElement('option'); opt1.value = child.id; opt1.innerText = child.name || 'Si Kecil';
                 if (child.id === activeChildId) opt1.selected = true;
                 frontSelect.appendChild(opt1);
 
-                const opt2 = document.createElement('option');
-                opt2.value = child.id;
-                opt2.innerText = child.name || 'Si Kecil';
+                const opt2 = document.createElement('option'); opt2.value = child.id; opt2.innerText = child.name || 'Si Kecil';
                 if (child.id === activeChildId) opt2.selected = true;
                 adminSelect.appendChild(opt2);
             });
@@ -731,9 +533,7 @@
             const ageDisplay = document.getElementById('calculatedAge');
 
             if (!dobInput || !photoDateInput) {
-                calculatedUsiaText = "";
-                ageDisplay.innerText = "";
-                return;
+                calculatedUsiaText = ""; ageDisplay.innerText = ""; return;
             }
 
             const dob = new Date(dobInput);
@@ -748,10 +548,7 @@
                 const lastMonth = new Date(photoDate.getFullYear(), photoDate.getMonth(), 0);
                 days += lastMonth.getDate();
             }
-            if (months < 0) {
-                years--;
-                months += 12;
-            }
+            if (months < 0) { years--; months += 12; }
 
             let ageResult = [];
             if (years > 0) ageResult.push(years + " Tahun");
@@ -871,50 +668,30 @@
             }
 
             try {
-                let newFileIds = [];
                 for (let i = 0; i < files.length; i++) {
-                    const base64Data = await compressImage(files[i], 800, 0.5);
-                    const uploadPayload = {
-                        action: "uploadOnly",
+                    const base64Data = await compressImage(files[i], 600, 0.4);
+                    
+                    const payload = {
+                        action: "addPhoto",
+                        id: targetCardIdForAdd,
+                        fileData: base64Data,
                         fileName: "foto_add_" + Date.now() + "_" + i + ".jpg",
-                        mimeType: "image/jpeg",
-                        fileData: base64Data
+                        mimeType: "image/jpeg"
                     };
 
-                    const response = await fetch(WEB_APP_URL, {
+                    await fetch(WEB_APP_URL, {
                         method: 'POST',
-                        mode: 'cors',
+                        mode: 'no-cors',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify(uploadPayload)
+                        body: JSON.stringify(payload)
                     });
-
-                    const resData = await response.json();
-                    if (resData.result === 'success' && resData.fileId) {
-                        newFileIds.push(resData.fileId);
-                    }
                 }
 
-                if (newFileIds.length > 0) {
-                    const res = await fetch(WEB_APP_URL, {
-                        method: 'POST',
-                        mode: 'cors',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ 
-                            action: "addPhotosToExisting", 
-                            id: targetCardIdForAdd, 
-                            newFileIds: newFileIds.join(',') 
-                        })
-                    });
-                    const data = await res.json();
-                    if (data.result === 'success') {
-                        alert("✨ Foto tambahan berhasil dimasukkan ke album!");
-                        loadAlbum();
-                    } else {
-                        alert("Gagal memperbarui album di server: " + (data.message || ""));
-                    }
-                }
+                alert("✨ Foto berhasil dikirim! Silakan tunggu beberapa detik lalu muat ulang halaman.");
+                setTimeout(() => { loadAlbum(); }, 2000);
+
             } catch (err) {
-                alert("Terjadi kesalahan koneksi saat mengunggah foto tambahan.");
+                alert("Terjadi kesalahan saat mengunggah foto tambahan.");
                 console.error(err);
             } finally {
                 input.value = '';
@@ -925,25 +702,20 @@
         async function deletePhoto(id) {
             if (!confirm("Apakah Anda yakin ingin menghapus seluruh kenangan foto ini?")) return;
             try {
-                const res = await fetch(WEB_APP_URL, {
+                await fetch(WEB_APP_URL, {
                     method: 'POST',
-                    mode: 'cors',
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: "delete", id: id })
                 });
-                const data = await res.json();
-                if (data.result === 'success') {
-                    alert("🗑️ Berhasil dihapus!");
-                    loadAlbum();
-                } else {
-                    alert("Gagal menghapus.");
-                }
+                alert("🗑️ Perintah hapus dikirim!");
+                setTimeout(() => { loadAlbum(); }, 1500);
             } catch (err) {
-                alert("Terjadi kesalahan koneksi.");
+                alert("Gagal menghapus.");
             }
         }
 
-        function compressImage(file, maxWidth = 800, quality = 0.5) {
+        function compressImage(file, maxWidth = 600, quality = 0.4) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -982,72 +754,39 @@
             try {
                 const rawDate = document.getElementById('tanggalFoto').value;
                 const formattedDate = formatDateIndo(rawDate);
-                let uploadedFileIds = [];
-                let firstBase64 = "";
 
                 for (let i = 0; i < files.length; i++) {
-                    btn.innerText = `⏳ Memproses & Mengunggah foto (${i + 1} dari ${files.length})...`;
-                    const base64Data = await compressImage(files[i], 800, 0.5);
-                    if (i === 0) firstBase64 = base64Data;
+                    btn.innerText = `⏳ Mengunggah foto (${i + 1} dari ${files.length})...`;
+                    const base64Data = await compressImage(files[i], 600, 0.4);
 
-                    const uploadPayload = {
-                        action: "uploadOnly",
-                        fileName: "foto_" + Date.now() + "_" + i + ".jpg",
+                    const payload = {
+                        action: "saveData",
+                        fileData: base64Data,
+                        fileName: files[i].name,
                         mimeType: "image/jpeg",
-                        fileData: base64Data
+                        judul: document.getElementById('judul').value,
+                        tanggal: formattedDate,
+                        usia: calculatedUsiaText,
+                        lokasi: document.getElementById('lokasi').value,
+                        cerita: document.getElementById('cerita').value
                     };
 
-                    const response = await fetch(WEB_APP_URL, {
+                    await fetch(WEB_APP_URL, {
                         method: 'POST',
-                        mode: 'cors',
+                        mode: 'no-cors',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify(uploadPayload)
+                        body: JSON.stringify(payload)
                     });
-
-                    const resData = await response.json();
-                    if (resData.result === 'success' && resData.fileId) {
-                        uploadedFileIds.push(resData.fileId);
-                    } else {
-                        throw new Error(resData.message || ("Gagal mengunggah foto ke-" + (i + 1)));
-                    }
                 }
 
-                btn.innerText = `💾 Menyimpan kenangan ke Google Sheets...`;
-
-                const finalPayload = {
-                    action: "saveData",
-                    fileId: uploadedFileIds.join(','),
-                    fileData: firstBase64,
-                    fileName: files[0].name,
-                    mimeType: "image/jpeg",
-                    judul: document.getElementById('judul').value,
-                    tanggal: formattedDate,
-                    usia: calculatedUsiaText,
-                    lokasi: document.getElementById('lokasi').value,
-                    cerita: document.getElementById('cerita').value
-                };
-
-                const finalResponse = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(finalPayload)
-                });
-
-                const finalData = await finalResponse.json();
-
-                if (finalData.result === 'success') {
-                    alert("🎉 Berhasil! " + files.length + " foto disimpan dalam 1 kenangan.");
-                    document.getElementById('uploadForm').reset();
-                    document.getElementById('calculatedAge').innerText = "";
-                    document.getElementById('exifNotice').innerText = "";
-                    loadAlbum();
-                } else {
-                    alert("Gagal menyimpan data ke Spreadsheet: " + (finalData.message || ""));
-                }
+                alert("🎉 Berhasil dikirim! Album akan diperbarui.");
+                document.getElementById('uploadForm').reset();
+                document.getElementById('calculatedAge').innerText = "";
+                document.getElementById('exifNotice').innerText = "";
+                setTimeout(() => { loadAlbum(); }, 2000);
 
             } catch (err) {
-                alert("Terjadi kesalahan saat mengunggah: " + err.message);
+                alert("Gagal mengunggah foto.");
                 console.error(err);
             } finally {
                 btn.disabled = false;
