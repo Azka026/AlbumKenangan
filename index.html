@@ -340,7 +340,7 @@
 
     <script>
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxhx0J21D_tF2ics-uQwdHXcXDRxeY1wgrU8ngbDeOLrkLHyag6cGOfWhSMYHDISiDO/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxAc2XiVdAZN2ZpegrSVXczx00WwATgpc5tSn71vdEeOpT6X02qwh8hyndEZIS5YLen/exec';
         const ADMIN_PASSWORD = "azka23";
 
         let calculatedUsiaText = "";
@@ -368,7 +368,7 @@
 
         function openModalGroup(fileIdsStr, startIndex) {
             const ids = fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
-            currentImageGroup = ids.map(id => id.includes('http') ? id : `https://lh3.googleusercontent.com/d/${id}`);
+            currentImageGroup = ids.map(id => id.includes('http') ? id : `https://drive.google.com/uc?export=view&id=${id}`);
             currentImageIndex = startIndex;
             updateModalView();
             document.getElementById('imageModal').style.display = 'flex';
@@ -574,12 +574,12 @@
 
                     let galleryHtml = "";
                     if (ids.length === 1) {
-                        const imgUrl = ids[0].includes('http') ? ids[0] : `https://lh3.googleusercontent.com/d/${ids[0]}`;
+                        const imgUrl = ids[0].includes('http') ? ids[0] : `https://drive.google.com/uc?export=view&id=${ids[0]}`;
                         galleryHtml = `<div class="card-img-container" onclick="openModalGroup('${ids.join(',')}', 0)"><img src="${imgUrl}" class="card-img" alt="${item.judul}"></div>`;
                     } else if (ids.length > 1) {
                         let imgs = "";
                         ids.forEach((imgId, idx) => {
-                            const imgUrl = imgId.includes('http') ? imgId : `https://lh3.googleusercontent.com/d/${imgId}`;
+                            const imgUrl = imgId.includes('http') ? imgId : `https://drive.google.com/uc?export=view&id=${imgId}`;
                             imgs += `<div class="card-img-container" onclick="openModalGroup('${ids.join(',')}', ${idx})"><img src="${imgUrl}" class="card-img" alt="${item.judul}"></div>`;
                         });
                         galleryHtml = `<div class="photo-gallery-grid">${imgs}</div>`;
