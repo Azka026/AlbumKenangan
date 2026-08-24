@@ -349,7 +349,7 @@
 
     <script>
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwV_s-Df3HOrWjdh9Z-mVQvEWWvqpHdvdGaml4vPlM37tXsDIsRQtZgm4mmIhjEEC2Tkw/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbws0I28WTcvO9rIenBLXL-AncwFj8-dcWEBv4JlKVtjH5daJk-7bzPyEqdy19V_IPML/exec';
         const ADMIN_PASSWORD = "azka23";
 
         let calculatedUsiaText = "";
@@ -579,11 +579,9 @@
             if (!dateStr) return 0;
             let str = dateStr.trim();
 
-            // Coba standar Date dulu (misal YYYY-MM-DD)
             let d = new Date(str);
             if (!isNaN(d.getTime())) return d.getTime();
 
-            // Kamus Nama Bulan Indonesia
             const months = {
                 'januari': 0, 'jan': 0,
                 'februari': 1, 'feb': 1,
@@ -644,7 +642,6 @@
 
                     if (!id || !judul) continue;
 
-                    // Mengurai Tanggal dengan parser pintar bahasa Indonesia
                     let timeVal = parseIndonesianDate(tanggal);
 
                     items.push({
@@ -660,7 +657,6 @@
                     });
                 }
 
-                // URUTKAN: TANGGAL TERBARU DI PALING ATAS
                 items.sort((a, b) => b.dateTime - a.dateTime);
 
                 if (items.length === 0) {
@@ -773,7 +769,7 @@
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
 
@@ -809,29 +805,31 @@
             if (!input.files || input.files.length === 0 || !targetCardIdForAdd) return;
 
             const file = input.files[0];
-            alert("Mengunggah foto tambahan, mohon tunggu sebentar... ⏳");
-            const base64Data = await convertFileToBase64(file);
-
-            const payload = {
-                action: 'addPhoto',
-                id: targetCardIdForAdd,
-                fileName: file.name,
-                mimeType: file.type,
-                fileData: base64Data
-            };
+            alert("Sedang mengunggah foto tambahan... Mohon tunggu sebentar ⏳");
 
             try {
+                const base64Data = await convertFileToBase64(file);
+
+                const payload = {
+                    action: 'addPhoto',
+                    id: targetCardIdForAdd,
+                    fileName: file.name,
+                    mimeType: file.type,
+                    fileData: base64Data
+                };
+
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
 
-                alert("Foto tambahan berhasil diunggah! ✨ Halaman akan diperbarui.");
+                alert("Foto tambahan berhasil diunggah! ✨ Galeri akan diperbarui.");
                 input.value = "";
                 setTimeout(loadAlbum, 3500);
             } catch (err) {
+                console.error(err);
                 alert("Gagal mengunggah foto tambahan.");
             }
         }
@@ -848,7 +846,7 @@
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: 'delete', id: id })
                 });
 
