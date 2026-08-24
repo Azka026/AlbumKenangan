@@ -261,8 +261,27 @@
         
         .location-tag { font-size: 0.85em; color: var(--text-muted); font-weight: 500; }
         
+        .admin-action-box {
+            display: none;
+            margin-top: 15px;
+            border-top: 1px dashed #cbd5e0;
+            padding-top: 15px;
+        }
+
+        .admin-sub-btn {
+            background: #e6fffa;
+            color: #234e52;
+            border: 1px solid #b2f5ea;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
         .admin-delete-btn { 
-            display: none; 
             background: #fff5f5; 
             color: #e53e3e; 
             border: 1px solid #feb2b2; 
@@ -271,26 +290,68 @@
             font-size: 0.8em; 
             font-weight: 700; 
             cursor: pointer; 
-            margin-top: 15px; 
             width: 100%;
         }
 
         .status-msg { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500; }
 
-        /* MODAL FULLSCREEN */
+        /* MODAL FULLSCREEN DENGAN NAVIGASI SLIDER */
         .image-modal {
             display: none;
             position: fixed;
             z-index: 9999;
             left: 0; top: 0;
             width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(5px);
+            background-color: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(8px);
             align-items: center;
             justify-content: center;
+            touch-action: pan-y;
         }
-        .modal-content { max-width: 95%; max-height: 90vh; object-fit: contain; border-radius: 12px; }
-        .modal-close { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; z-index: 10000; }
+        .modal-content { 
+            max-width: 95%; 
+            max-height: 85vh; 
+            object-fit: contain; 
+            border-radius: 12px;
+            transition: transform 0.2s ease-out;
+            user-select: none;
+        }
+        .modal-close { 
+            position: absolute; 
+            top: 20px; 
+            right: 25px; 
+            color: #fff; 
+            font-size: 35px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            z-index: 10001; 
+        }
+        .modal-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            font-size: 24px;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10000;
+            user-select: none;
+        }
+        .modal-nav-prev { left: 15px; }
+        .modal-nav-next { right: 15px; }
+        .modal-counter {
+            position: absolute;
+            bottom: 20px;
+            color: white;
+            font-size: 0.9em;
+            font-weight: 600;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
 
         .pwa-install-banner {
             display: none;
@@ -379,9 +440,16 @@
         <div id="album-list" class="status-msg">Memuat album kenangan... ✨</div>
     </div>
 
-    <div id="imageModal" class="image-modal" onclick="closeModal()">
+    <!-- Hidden file input untuk menambah foto ke kenangan lama -->
+    <input type="file" id="additionalPhotoInput" accept="image/*" multiple style="display:none" onchange="handleAdditionalPhotos(this)">
+
+    <!-- MODAL FULLSCREEN SLIDER -->
+    <div id="imageModal" class="image-modal">
         <span class="modal-close" onclick="closeModal()">&times;</span>
+        <button class="modal-nav-btn modal-nav-prev" id="btnPrev" onclick="prevImage(event)">❮</button>
         <img class="modal-content" id="modalImg">
+        <button class="modal-nav-btn modal-nav-next" id="btnNext" onclick="nextImage(event)">❯</button>
+        <div class="modal-counter" id="modalCounter"></div>
     </div>
 
     <div id="pwaBanner" class="pwa-install-banner">
@@ -399,6 +467,13 @@
 
         let calculatedUsiaText = "";
         let deferredPrompt = null;
+        let targetCardIdForAdd = null;
+
+        // Variabel Navigasi Modal Lightbox
+        let currentImageGroup = [];
+        let currentImageIndex = 0;
+        let touchStartX = 0;
+        let touchEndX = 0;
 
         let childrenData = JSON.parse(localStorage.getItem('children_data')) || [
             { id: '1', name: 'Si Kecil', parents: '', dob: '' }
@@ -434,15 +509,93 @@
                 showAdminUI(true);
             }
             loadAlbum();
+            setupSwipeEvents();
         };
 
-        function openModal(imgSrc) {
-            document.getElementById('modalImg').src = imgSrc;
+        // OPEN MODAL SLIDER
+        function openModalGroup(fileIdsStr, startIndex) {
+            const ids = fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
+            currentImageGroup = ids.map(id => `https://lh3.googleusercontent.com/d/${id}`);
+            currentImageIndex = startIndex;
+            
+            updateModalView();
             document.getElementById('imageModal').style.display = 'flex';
+        }
+
+        function updateModalView() {
+            const img = document.getElementById('modalImg');
+            img.src = currentImageGroup[currentImageIndex];
+            
+            const prevBtn = document.getElementById('btnPrev');
+            const nextBtn = document.getElementById('btnNext');
+            const counter = document.getElementById('modalCounter');
+
+            if (currentImageGroup.length > 1) {
+                prevBtn.style.display = 'block';
+                nextBtn.style.display = 'block';
+                counter.style.display = 'block';
+                counter.innerText = `${currentImageIndex + 1} / ${currentImageGroup.length}`;
+            } else {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                counter.style.display = 'none';
+            }
+        }
+
+        function prevImage(e) {
+            if (e) e.stopPropagation();
+            if (currentImageIndex > 0) {
+                currentImageIndex--;
+            } else {
+                currentImageIndex = currentImageGroup.length - 1; // Putar ke akhir
+            }
+            updateModalView();
+        }
+
+        function nextImage(e) {
+            if (e) e.stopPropagation();
+            if (currentImageIndex < currentImageGroup.length - 1) {
+                currentImageIndex++;
+            } else {
+                currentImageIndex = 0; // Putar balik ke awal
+            }
+            updateModalView();
         }
 
         function closeModal() {
             document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // SWIPE & KEYBOARD LISTENERS
+        function setupSwipeEvents() {
+            const modal = document.getElementById('imageModal');
+            
+            modal.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            modal.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, { passive: true });
+
+            document.addEventListener('keydown', (e) => {
+                if (modal.style.display === 'flex') {
+                    if (e.key === 'ArrowLeft') prevImage();
+                    if (e.key === 'ArrowRight') nextImage();
+                    if (e.key === 'Escape') closeModal();
+                }
+            });
+        }
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            if (touchEndX < touchStartX - swipeThreshold) {
+                nextImage(); // Swipe Kiri -> Foto Selanjutnya
+            }
+            if (touchEndX > touchStartX + swipeThreshold) {
+                prevImage(); // Swipe Kanan -> Foto Sebelumnya
+            }
         }
 
         function renderChildDropdowns() {
@@ -514,16 +667,16 @@
         function showAdminUI(isLoggedIn) {
             const adminPanel = document.getElementById('adminPanel');
             const adminBtn = document.getElementById('adminBtn');
-            const deleteButtons = document.querySelectorAll('.admin-delete-btn');
+            const adminActionBoxes = document.querySelectorAll('.admin-action-box');
 
             if (isLoggedIn) {
                 adminPanel.style.display = 'block';
                 adminBtn.innerText = '🔓 Keluar Admin';
-                deleteButtons.forEach(btn => btn.style.display = 'block');
+                adminActionBoxes.forEach(box => box.style.display = 'block');
             } else {
                 adminPanel.style.display = 'none';
                 adminBtn.innerText = '🔒 Admin';
-                deleteButtons.forEach(btn => btn.style.display = 'none');
+                adminActionBoxes.forEach(box => box.style.display = 'none');
             }
         }
 
@@ -657,10 +810,10 @@
                     let photosHtml = '';
                     if (fileIds.length > 1) {
                         photosHtml = `<div class="photo-gallery-grid">`;
-                        fileIds.forEach(fId => {
+                        fileIds.forEach((fId, index) => {
                             const imgUrl = `https://lh3.googleusercontent.com/d/${fId}`;
                             photosHtml += `
-                                <div class="card-img-container" onclick="openModal('${imgUrl}')">
+                                <div class="card-img-container" onclick="openModalGroup('${cleanFileId}', ${index})">
                                     <img class="card-img" src="${imgUrl}" alt="${judul}" loading="lazy">
                                 </div>
                             `;
@@ -670,7 +823,7 @@
                         const imgUrl = `https://lh3.googleusercontent.com/d/${fileIds[0]}`;
                         photosHtml = `
                             <div class="single-photo">
-                                <div class="card-img-container" onclick="openModal('${imgUrl}')">
+                                <div class="card-img-container" onclick="openModalGroup('${cleanFileId}', 0)">
                                     <img class="card-img" src="${imgUrl}" alt="${judul}" loading="lazy">
                                 </div>
                             </div>
@@ -691,13 +844,80 @@
                                 <div class="card-footer">
                                     <span class="location-tag">${lokasi ? '📍 ' + lokasi : ''}</span>
                                 </div>
-                                <button class="admin-delete-btn" style="display: ${isAdmin ? 'block' : 'none'};" onclick="deletePhoto('${id}')">🗑️ Hapus Kenangan Ini</button>
+                                <div class="admin-action-box" style="display: ${isAdmin ? 'block' : 'none'};">
+                                    <button class="admin-sub-btn" onclick="triggerAddPhotoToAlbum('${id}')">➕ Tambah Foto ke Kenangan Ini</button>
+                                    <button class="admin-delete-btn" onclick="deletePhoto('${id}')">🗑️ Hapus Kenangan Ini</button>
+                                </div>
                             </div>
                         </div>
                     `;
                 });
             } catch (e) {
                 document.getElementById('album-list').innerHTML = 'Gagal memuat album.';
+            }
+        }
+
+        function triggerAddPhotoToAlbum(id) {
+            targetCardIdForAdd = id;
+            document.getElementById('additionalPhotoInput').click();
+        }
+
+        async function handleAdditionalPhotos(input) {
+            const files = input.files;
+            if (!files || files.length === 0 || !targetCardIdForAdd) return;
+
+            if (!confirm(`Tambahkan ${files.length} foto baru ke kenangan ini?`)) {
+                input.value = '';
+                return;
+            }
+
+            try {
+                let newFileIds = [];
+                for (let i = 0; i < files.length; i++) {
+                    const base64Data = await compressImage(files[i], 1000, 0.6);
+                    const uploadPayload = {
+                        action: "uploadOnly",
+                        fileName: "foto_add_" + Date.now() + "_" + i + ".jpg",
+                        mimeType: "image/jpeg",
+                        fileData: base64Data
+                    };
+
+                    const response = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(uploadPayload)
+                    });
+
+                    const resData = await response.json();
+                    if (resData.result === 'success' && resData.fileId) {
+                        newFileIds.push(resData.fileId);
+                    }
+                }
+
+                if (newFileIds.length > 0) {
+                    const res = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ 
+                            action: "addPhotosToExisting", 
+                            id: targetCardIdForAdd, 
+                            newFileIds: newFileIds.join(',') 
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.result === 'success') {
+                        alert("✨ Foto tambahan berhasil dimasukkan ke album!");
+                        loadAlbum();
+                    } else {
+                        alert("Gagal memperbarui album di server.");
+                    }
+                }
+            } catch (err) {
+                alert("Terjadi kesalahan koneksi.");
+                console.error(err);
+            } finally {
+                input.value = '';
+                targetCardIdForAdd = null;
             }
         }
 
