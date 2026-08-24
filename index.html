@@ -373,7 +373,6 @@
             loadAlbum();
         };
 
-        // KEMBALI DARI VIEW MODAL TANPA KELUAR APLIKASI
         window.onpopstate = function(event) {
             if (isModalOpen) {
                 closeModalUI();
@@ -575,7 +574,50 @@
             calculatedUsiaText = result.replace("Usia saat foto: ", "");
         }
 
-        // FUNGSI MEMUAT & MENGURUTKAN KRONOLOGIS (TANGGAL TERBARU DI ATAS)
+        // FUNGSI PENGONVERSI TANGGAL INDONESIA KE TIMESTAMP PRESISI
+        function parseIndonesianDate(dateStr) {
+            if (!dateStr) return 0;
+            let str = dateStr.trim();
+
+            // Coba standar Date dulu (misal YYYY-MM-DD)
+            let d = new Date(str);
+            if (!isNaN(d.getTime())) return d.getTime();
+
+            // Kamus Nama Bulan Indonesia
+            const months = {
+                'januari': 0, 'jan': 0,
+                'februari': 1, 'feb': 1,
+                'maret': 2, 'mar': 2,
+                'april': 3, 'apr': 3,
+                'mei': 4,
+                'juni': 5, 'jun': 5,
+                'juli': 6, 'jul': 6,
+                'agustus': 7, 'agu': 7, 'agt': 7,
+                'september': 8, 'sep': 8,
+                'oktober': 9, 'okt': 9,
+                'november': 10, 'nov': 10,
+                'desember': 11, 'des': 11
+            };
+
+            const parts = str.split(/\s+|-|\//);
+            if (parts.length >= 3) {
+                let day = parseInt(parts[0], 10);
+                let monthStr = parts[1].toLowerCase();
+                let year = parseInt(parts[2], 10);
+
+                let month = months[monthStr];
+                if (month === undefined) {
+                    month = parseInt(parts[1], 10) - 1;
+                }
+
+                if (!isNaN(day) && month !== undefined && !isNaN(month) && !isNaN(year)) {
+                    return new Date(year, month, day).getTime();
+                }
+            }
+            return 0;
+        }
+
+        // FUNGSI MEMUAT & MENGURUTKAN (TERBARU PALING ATAS)
         async function loadAlbum() {
             const container = document.getElementById('album-list');
             container.className = 'status-msg';
@@ -602,20 +644,8 @@
 
                     if (!id || !judul) continue;
 
-                    // Konversi Tanggal Foto ke Timestamp untuk Pengurutan Presisi
-                    let timeVal = 0;
-                    if (tanggal) {
-                        let dateObj = new Date(tanggal);
-                        if (isNaN(dateObj.getTime())) {
-                            const parts = tanggal.split(/[-/]/);
-                            if (parts.length === 3) {
-                                if (parts[0].length === 2 && parts[2].length === 4) {
-                                    dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                                }
-                            }
-                        }
-                        timeVal = !isNaN(dateObj.getTime()) ? dateObj.getTime() : 0;
-                    }
+                    // Mengurai Tanggal dengan parser pintar bahasa Indonesia
+                    let timeVal = parseIndonesianDate(tanggal);
 
                     items.push({
                         id: id,
@@ -630,7 +660,7 @@
                     });
                 }
 
-                // URUTKAN: TANGGAL TERBARU (UMUR PALING BESAR) DI PALING ATAS
+                // URUTKAN: TANGGAL TERBARU DI PALING ATAS
                 items.sort((a, b) => b.dateTime - a.dateTime);
 
                 if (items.length === 0) {
