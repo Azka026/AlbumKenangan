@@ -327,7 +327,8 @@
         <div id="album-list" class="status-msg">Memuat album kenangan... ✨</div>
     </div>
 
-    <input type="file" id="additionalPhotoInput" accept="image/*" style="display:none" onchange="handleAdditionalPhotos(this)">
+    <!-- Input tersembunyi untuk tambah foto (mendukung multiple files) -->
+    <input type="file" id="additionalPhotoInput" accept="image/*" multiple style="display:none" onchange="handleAdditionalPhotos(this)">
 
     <div id="imageModal" class="image-modal">
         <span class="modal-close" onclick="closeModalDirect()">&times;</span>
@@ -680,30 +681,41 @@
             document.getElementById('additionalPhotoInput').click();
         }
 
+        // Fungsi penambahan foto berurutan (sequential loop) agar stabil untuk multiple file
         async function handleAdditionalPhotos(input) {
             if (!input.files || input.files.length === 0 || !targetCardIdForAdd) return;
 
-            const file = input.files[0];
-            alert("Sedang mengunggah foto tambahan... Mohon tunggu sebentar ⏳");
+            const files = input.files;
+            alert(`Mulai mengunggah ${files.length} foto tambahan... Mohon tunggu sampai selesai ⏳`);
 
             try {
-                const base64Data = await convertFileToBase64(file);
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const base64Data = await convertFileToBase64(file);
 
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        action: 'addPhoto', id: targetCardIdForAdd,
-                        fileName: file.name, mimeType: file.type, fileData: base64Data
-                    })
-                });
+                    await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'addPhoto', 
+                            id: targetCardIdForAdd,
+                            fileName: file.name, 
+                            mimeType: file.type, 
+                            fileData: base64Data
+                        })
+                    });
 
-                alert("Foto tambahan berhasil diunggah! ✨");
+                    // Jeda sejenak antar file agar server Apps Script stabil
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                }
+
+                alert("Semua foto tambahan berhasil diunggah! ✨");
                 input.value = "";
-                setTimeout(loadAlbum, 3500);
+                setTimeout(loadAlbum, 3000);
             } catch (err) {
                 alert("Gagal mengunggah foto tambahan.");
+                console.error(err);
             }
         }
 
