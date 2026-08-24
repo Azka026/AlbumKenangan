@@ -127,7 +127,6 @@
             font-size: 0.9em; 
             width: 100%; 
             margin-bottom: 12px;
-            transition: border-color 0.2s;
         }
 
         .btn-add-child {
@@ -162,7 +161,6 @@
             border-radius: 12px; 
             font-size: 0.95em; 
             font-family: inherit;
-            transition: border-color 0.2s;
             background: #fafafa;
         }
         .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); background: #fff; }
@@ -182,7 +180,6 @@
             cursor: pointer; 
             font-size: 1em; 
             box-shadow: 0 6px 20px rgba(49, 130, 206, 0.35);
-            transition: transform 0.1s, opacity 0.2s;
         }
         .btn-submit:active { transform: scale(0.98); }
         .btn-submit:disabled { background: #cbd5e0; box-shadow: none; cursor: not-allowed; }
@@ -198,7 +195,6 @@
             border: 1px solid rgba(0,0,0,0.04);
         }
         
-        /* Grid Layout Jika Banyak Foto */
         .photo-gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -232,10 +228,7 @@
             transition: transform 0.3s ease;
         }
 
-        .single-photo .card-img {
-            object-fit: contain;
-        }
-        
+        .single-photo .card-img { object-fit: contain; }
         .card-img-container:hover .card-img { transform: scale(1.03); }
 
         .card-body { padding: 22px; }
@@ -255,7 +248,7 @@
             border: 1px solid #bee3f8;
         }
 
-        .card-title { font-size: 1.25em; color: var(--text-main); margin-bottom: 10px; font-weight: 700; letter-spacing: -0.3px; }
+        .card-title { font-size: 1.25em; color: var(--text-main); margin-bottom: 10px; font-weight: 700; }
         .card-story { line-height: 1.7; color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; white-space: pre-line; }
         
         .card-footer { 
@@ -266,7 +259,7 @@
             padding-top: 15px; 
         }
         
-        .location-tag { font-size: 0.85em; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 4px; }
+        .location-tag { font-size: 0.85em; color: var(--text-muted); font-weight: 500; }
         
         .admin-delete-btn { 
             display: none; 
@@ -289,42 +282,22 @@
             display: none;
             position: fixed;
             z-index: 9999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(5px);
             align-items: center;
             justify-content: center;
         }
-
-        .modal-content {
-            max-width: 95%;
-            max-height: 90vh;
-            object-fit: contain;
-            border-radius: 12px;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 25px;
-            color: #fff;
-            font-size: 35px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 10000;
-        }
+        .modal-content { max-width: 95%; max-height: 90vh; object-fit: contain; border-radius: 12px; }
+        .modal-close { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; z-index: 10000; }
 
         .pwa-install-banner {
             display: none;
             position: fixed;
-            bottom: 15px;
-            left: 50%;
+            bottom: 15px; left: 50%;
             transform: translateX(-50%);
-            width: 92%;
-            max-width: 500px;
+            width: 92%; max-width: 500px;
             background: #ffffff;
             border-radius: 16px;
             padding: 14px 18px;
@@ -334,17 +307,7 @@
             align-items: center;
             justify-content: space-between;
         }
-
-        .btn-pwa-install {
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            padding: 9px 15px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 0.8em;
-            cursor: pointer;
-        }
+        .btn-pwa-install { background: var(--primary-gradient); color: white; border: none; padding: 9px 15px; border-radius: 10px; font-weight: 700; font-size: 0.8em; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -401,7 +364,7 @@
                     </div>
                     <div class="form-group">
                         <label>Lokasi (Opsional):</label>
-                        <input type="text" id="lokasi" placeholder="Contoh: Taman Kota / Ancol">
+                        <input type="text" id="lokasi" placeholder="Contoh: Taman Kota">
                     </div>
                     <div class="form-group">
                         <label>Cerita Kenangan:</label>
@@ -421,7 +384,6 @@
         <img class="modal-content" id="modalImg">
     </div>
 
-    <!-- BANNER PWA -->
     <div id="pwaBanner" class="pwa-install-banner">
         <div>
             <h5 style="font-size:0.9em;">Album Si Kecil</h5>
@@ -468,7 +430,6 @@
         window.onload = function() {
             renderChildDropdowns();
             loadCurrentChildProfile();
-
             if (localStorage.getItem('is_admin_logged_in') === 'true') {
                 showAdminUI(true);
             }
@@ -476,9 +437,8 @@
         };
 
         function openModal(imgSrc) {
-            const modal = document.getElementById('imageModal');
             document.getElementById('modalImg').src = imgSrc;
-            modal.style.display = 'flex';
+            document.getElementById('imageModal').style.display = 'flex';
         }
 
         function closeModal() {
@@ -588,7 +548,6 @@
             const tanggalFotoInput = document.getElementById('tanggalFoto');
 
             if (!files || files.length === 0) return;
-
             exifNotice.innerText = `🔍 Membaca tanggal dari ${files.length} foto...`;
 
             EXIF.getData(files[0], function() {
@@ -621,6 +580,7 @@
 
             if (!dobInput || !photoDateInput) {
                 calculatedUsiaText = "";
+                ageDisplay.innerText = "";
                 return;
             }
 
@@ -695,9 +655,7 @@
                     const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
 
                     let photosHtml = '';
-                    const isMultiple = fileIds.length > 1;
-
-                    if (isMultiple) {
+                    if (fileIds.length > 1) {
                         photosHtml = `<div class="photo-gallery-grid">`;
                         fileIds.forEach(fId => {
                             const imgUrl = `https://lh3.googleusercontent.com/d/${fId}`;
@@ -797,21 +755,17 @@
             const files = fileInput.files;
 
             if (!files || files.length === 0) return alert("Pilih minimal satu foto!");
-
             btn.disabled = true;
 
             try {
                 const rawDate = document.getElementById('tanggalFoto').value;
                 const formattedDate = formatDateIndo(rawDate);
-                
                 let uploadedFileIds = [];
                 let firstBase64 = "";
 
                 for (let i = 0; i < files.length; i++) {
                     btn.innerText = `⏳ Memproses & Mengunggah foto (${i + 1} dari ${files.length})...`;
-                    
                     const base64Data = await compressImage(files[i], 1000, 0.6);
-
                     if (i === 0) firstBase64 = base64Data;
 
                     const uploadPayload = {
@@ -839,10 +793,10 @@
 
                 const finalPayload = {
                     action: "saveData",
+                    fileId: uploadedFileIds.join(','),
+                    fileData: firstBase64,
                     fileName: files[0].name,
                     mimeType: "image/jpeg",
-                    fileData: firstBase64,
-                    fileId: uploadedFileIds.join(','),
                     judul: document.getElementById('judul').value,
                     tanggal: formattedDate,
                     usia: calculatedUsiaText,
