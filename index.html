@@ -564,20 +564,29 @@
                 container.innerHTML = "";
 
                 const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
+                let displayedCount = 0;
 
-                // Skip header (i=1)
+                // Loop dari data terbaru ke terkecil (skip header i=0)
                 for (let i = rows.length - 1; i >= 1; i--) {
                     const row = rows[i];
+                    
+                    // PERBAIKAN: Validasi baris kosong / rusak
                     if (!row || row.length < 3) continue;
 
-                    const id = row[0];
-                    const tanggal = row[1];
-                    const judul = row[2];
-                    const cerita = row[3];
-                    const lokasi = row[4];
-                    const usia = row[5];
-                    const fileUrl = row[6];
-                    const fileIdsStr = row[7] || row[6];
+                    const id = row[0] ? row[0].trim() : "";
+                    const tanggal = row[1] ? row[1].trim() : "";
+                    const judul = row[2] ? row[2].trim() : "";
+
+                    // JIKA ID ATAU JUDUL KOSONG, LEWATI (Mencegah tampilan kartu kosong error)
+                    if (!id || !judul) continue;
+
+                    displayedCount++;
+
+                    const cerita = row[3] || "";
+                    const lokasi = row[4] || "";
+                    const usia = row[5] || "";
+                    const fileUrl = row[6] || "";
+                    const fileIdsStr = row[7] || row[6] || "";
 
                     const ids = fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
 
@@ -589,7 +598,7 @@
                                 <img src="${imgUrl}" class="card-img" alt="${judul}">
                             </div>
                         `;
-                    } else {
+                    } else if (ids.length > 1) {
                         let imgs = "";
                         ids.forEach((imgId, idx) => {
                             const imgUrl = imgId.includes('http') ? imgId : `https://lh3.googleusercontent.com/d/${imgId}`;
@@ -600,6 +609,8 @@
                             `;
                         });
                         galleryHtml = `<div class="photo-gallery-grid">${imgs}</div>`;
+                    } else {
+                        galleryHtml = "";
                     }
 
                     const card = document.createElement('div');
@@ -624,6 +635,12 @@
                     `;
                     container.appendChild(card);
                 }
+
+                if (displayedCount === 0) {
+                    container.className = 'status-msg';
+                    container.innerText = "Belum ada kenangan. Yuk tambah kenangan pertama! ✨";
+                }
+
             } catch (err) {
                 console.error(err);
                 container.innerText = "Gagal memuat album. Pastikan koneksi internet bagus! ❌";
@@ -737,6 +754,11 @@
         }
 
         async function deleteMemory(id) {
+            if (!id || id === 'undefined') {
+                alert("Kenangan ini tidak memiliki ID valid.");
+                return;
+            }
+
             if (!confirm("Yakin ingin menghapus kenangan ini?")) return;
 
             try {
