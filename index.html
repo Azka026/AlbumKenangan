@@ -339,7 +339,7 @@
     <input type="file" id="additionalPhotoInput" accept="image/*" multiple style="display:none" onchange="handleAdditionalPhotos(this)">
 
     <div id="imageModal" class="image-modal">
-        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <span class="modal-close" onclick="closeModalDirect()">&times;</span>
         <button class="modal-nav-btn modal-nav-prev" id="btnPrev" onclick="prevImage(event)">❮</button>
         <img class="modal-content" id="modalImg">
         <button class="modal-nav-btn modal-nav-next" id="btnNext" onclick="nextImage(event)">❯</button>
@@ -356,6 +356,7 @@
 
         let currentImageGroup = [];
         let currentImageIndex = 0;
+        let isModalOpen = false;
 
         let childrenData = JSON.parse(localStorage.getItem('children_data')) || [
             { id: '1', name: 'Si Kecil', parents: '', dob: '' }
@@ -371,6 +372,19 @@
             loadAlbum();
         };
 
+        // FITUR KEMBALI (BACK) HP SUPAYA TIDAK KELUAR APLIKASI SAAT VIEW FOTO
+        window.onpopstate = function(event) {
+            if (isModalOpen) {
+                closeModalUI();
+            }
+        };
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isModalOpen) {
+                closeModalDirect();
+            }
+        });
+
         function openModalGroup(fileIdsStr, startIndex) {
             const ids = fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
             currentImageGroup = ids.map(id => {
@@ -380,6 +394,22 @@
             currentImageIndex = startIndex;
             updateModalView();
             document.getElementById('imageModal').style.display = 'flex';
+            
+            if (!isModalOpen) {
+                isModalOpen = true;
+                history.pushState({ modalOpen: true }, "");
+            }
+        }
+
+        function closeModalDirect() {
+            if (isModalOpen) {
+                history.back();
+            }
+        }
+
+        function closeModalUI() {
+            document.getElementById('imageModal').style.display = 'none';
+            isModalOpen = false;
         }
 
         function updateModalView() {
@@ -403,7 +433,6 @@
 
         function prevImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex > 0) ? currentImageIndex - 1 : currentImageGroup.length - 1; updateModalView(); }
         function nextImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex < currentImageGroup.length - 1) ? currentImageIndex + 1 : 0; updateModalView(); }
-        function closeModal() { document.getElementById('imageModal').style.display = 'none'; }
 
         function renderChildDropdowns() {
             const frontSelect = document.getElementById('selectChildFront');
@@ -560,42 +589,56 @@
                     return;
                 }
 
-                container.className = "";
-                container.innerHTML = "";
-
-                const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
-                let displayedCount = 0;
-
-                // Loop dari data terbaru ke terkecil (skip header i=0)
-                for (let i = rows.length - 1; i >= 1; i--) {
+                // EKSTRAKSI & PEMBERSIHAN DATA
+                let items = [];
+                for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
-                    
-                    // PERBAIKAN: Validasi baris kosong / rusak
                     if (!row || row.length < 3) continue;
 
                     const id = row[0] ? row[0].trim() : "";
                     const tanggal = row[1] ? row[1].trim() : "";
                     const judul = row[2] ? row[2].trim() : "";
 
-                    // JIKA ID ATAU JUDUL KOSONG, LEWATI (Mencegah tampilan kartu kosong error)
                     if (!id || !judul) continue;
 
-                    displayedCount++;
+                    items.push({
+                        id: id,
+                        tanggal: tanggal,
+                        judul: judul,
+                        cerita: row[3] || "",
+                        lokasi: row[4] || "",
+                        usia: row[5] || "",
+                        fileUrl: row[6] || "",
+                        fileIdsStr: row[7] || row[6] || "",
+                        // Ambil timestamp untuk pengurutan tanggal
+                        dateObj: new Date(tanggal).getTime() || 0
+                    });
+                }
 
-                    const cerita = row[3] || "";
-                    const lokasi = row[4] || "";
-                    const usia = row[5] || "";
-                    const fileUrl = row[6] || "";
-                    const fileIdsStr = row[7] || row[6] || "";
+                // URUTKAN BERDASARKAN TANGGAL FOTO (TERBARU DI ATAS)
+                items.sort((a, b) => b.dateObj - a.dateObj);
 
-                    const ids = fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
+                if (items.length === 0) {
+                    container.className = 'status-msg';
+                    container.innerText = "Belum ada kenangan. Yuk tambah kenangan pertama! ✨";
+                    return;
+                }
+
+                container.className = "";
+                container.innerHTML = "";
+
+                const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
+
+                items.forEach(item => {
+                    // Bersihkan daftar ID foto tambahan dari spasi/karakter tersembunyi
+                    const ids = item.fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
 
                     let galleryHtml = "";
                     if (ids.length === 1) {
                         const imgUrl = ids[0].includes('http') ? ids[0] : `https://lh3.googleusercontent.com/d/${ids[0]}`;
                         galleryHtml = `
-                            <div class="card-img-container" onclick="openModalGroup('${fileIdsStr}', 0)">
-                                <img src="${imgUrl}" class="card-img" alt="${judul}">
+                            <div class="card-img-container" onclick="openModalGroup('${ids.join(',')}', 0)">
+                                <img src="${imgUrl}" class="card-img" alt="${item.judul}">
                             </div>
                         `;
                     } else if (ids.length > 1) {
@@ -603,14 +646,12 @@
                         ids.forEach((imgId, idx) => {
                             const imgUrl = imgId.includes('http') ? imgId : `https://lh3.googleusercontent.com/d/${imgId}`;
                             imgs += `
-                                <div class="card-img-container" onclick="openModalGroup('${fileIdsStr}', ${idx})">
-                                    <img src="${imgUrl}" class="card-img" alt="${judul}">
+                                <div class="card-img-container" onclick="openModalGroup('${ids.join(',')}', ${idx})">
+                                    <img src="${imgUrl}" class="card-img" alt="${item.judul}">
                                 </div>
                             `;
                         });
                         galleryHtml = `<div class="photo-gallery-grid">${imgs}</div>`;
-                    } else {
-                        galleryHtml = "";
                     }
 
                     const card = document.createElement('div');
@@ -619,27 +660,22 @@
                         ${galleryHtml}
                         <div class="card-body">
                             <div class="meta-info">
-                                <span>📅 ${tanggal}</span>
-                                ${usia ? `<span>• 👶 ${usia}</span>` : ''}
+                                <span>📅 ${item.tanggal}</span>
+                                ${item.usia ? `<span>• 👶 ${item.usia}</span>` : ''}
                             </div>
-                            <h3 class="card-title">${judul}</h3>
-                            <p class="card-story">${cerita}</p>
+                            <h3 class="card-title">${item.judul}</h3>
+                            <p class="card-story">${item.cerita}</p>
                             <div class="card-footer">
-                                <span class="location-tag">${lokasi ? `📍 ${lokasi}` : ''}</span>
+                                <span class="location-tag">${item.lokasi ? `📍 ${item.lokasi}` : ''}</span>
                             </div>
                             <div class="admin-action-box" style="display: ${isAdmin ? 'block' : 'none'};">
-                                <button class="admin-sub-btn" onclick="triggerAddPhotos('${id}')">➕ Tambah Foto ke Momen Ini</button>
-                                <button class="admin-delete-btn" onclick="deleteMemory('${id}')">🗑️ Hapus Kenangan Ini</button>
+                                <button class="admin-sub-btn" onclick="triggerAddPhotos('${item.id}')">➕ Tambah Foto ke Momen Ini</button>
+                                <button class="admin-delete-btn" onclick="deleteMemory('${item.id}')">🗑️ Hapus Kenangan Ini</button>
                             </div>
                         </div>
                     `;
                     container.appendChild(card);
-                }
-
-                if (displayedCount === 0) {
-                    container.className = 'status-msg';
-                    container.innerText = "Belum ada kenangan. Yuk tambah kenangan pertama! ✨";
-                }
+                });
 
             } catch (err) {
                 console.error(err);
