@@ -3,466 +3,534 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Album Kenangan Kita ✨</title>
+    <title>Album Kenangan Si Kecil 👶✨</title>
+    
+    <meta name="theme-color" content="#3182ce">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Album Kecil">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2922/2922506.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+
     <style>
         :root {
-            --primary-color: #ff6b81;
-            --primary-hover: #ff4757;
-            --bg-color: #fff0f3;
+            --primary: #3182ce;
+            --primary-gradient: linear-gradient(135deg, #2b6cb0 0%, #4299e1 100%);
+            --secondary: #319795;
+            --bg-color: #f7fafc;
             --card-bg: #ffffff;
-            --text-main: #2f3542;
-            --text-muted: #747d8c;
-            --shadow: 0 10px 25px rgba(255, 107, 129, 0.1);
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --radius: 20px;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            padding: 20px 15px 90px 15px; 
             min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        header {
-            text-align: center;
-            padding: 40px 20px 20px 20px;
-            width: 100%;
-            max-width: 800px;
+        .container { max-width: 750px; margin: 0 auto; }
+        
+        header { 
+            text-align: center; 
+            padding: 35px 20px; 
+            background: var(--primary-gradient); 
+            color: white;
+            border-radius: var(--radius); 
+            margin-bottom: 20px; 
+            box-shadow: 0 10px 25px rgba(49, 130, 206, 0.25); 
+            position: relative; 
         }
 
-        header h1 {
-            color: var(--primary-color);
-            margin: 0;
-            font-size: 2.2rem;
-        }
-
-        header p {
-            color: var(--text-muted);
-            margin-top: 8px;
-            font-size: 1rem;
-        }
-
-        .controls-bar {
-            display: flex;
-            gap: 12px;
+        header h1 { font-size: 1.8em; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+        header p { font-size: 0.95em; opacity: 0.9; font-weight: 400; }
+        
+        .child-info-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
             margin-bottom: 25px;
-            flex-wrap: wrap;
-            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        .child-info-card h2 { font-size: 1.4em; color: var(--primary); font-weight: 700; margin-bottom: 6px; }
+        .child-info-card p { font-size: 0.9em; color: var(--text-muted); line-height: 1.5; }
+
+        .child-select-front {
+            margin-top: 12px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e0;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--text-main);
+            background: #f8fafc;
+            width: 100%;
+            max-width: 300px;
         }
 
-        .btn {
-            background-color: var(--primary-color);
+        .admin-toggle-btn { 
+            position: absolute; 
+            top: 15px; 
+            right: 15px; 
+            background: rgba(255, 255, 255, 0.25); 
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.4); 
+            padding: 6px 14px; 
+            border-radius: 30px; 
+            font-size: 0.75em; 
+            cursor: pointer; 
+            color: white; 
+            font-weight: 600; 
+        }
+
+        .admin-only { display: none; }
+
+        .profile-section { 
+            background: #fff; 
+            border: 1px solid #edf2f7; 
+            padding: 20px; 
+            border-radius: var(--radius); 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+        .profile-section h4 { font-size: 1em; color: var(--primary); margin-bottom: 15px; font-weight: 700; }
+        .profile-section label { font-size: 0.8em; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; }
+        .profile-section input, .profile-section select { 
+            padding: 10px 14px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 10px; 
+            font-size: 0.9em; 
+            width: 100%; 
+            margin-bottom: 12px;
+        }
+
+        .btn-add-child {
+            background: var(--secondary);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 0.95rem;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85em;
             cursor: pointer;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(255, 107, 129, 0.3);
-            transition: background 0.2s, transform 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background-color: #747d8c;
-            box-shadow: 0 4px 12px rgba(116, 125, 140, 0.3);
-        }
-        .btn-secondary:hover {
-            background-color: #57606f;
-        }
-
-        .container {
+            margin-bottom: 15px;
             width: 100%;
-            max-width: 700px;
-            padding: 0 15px 50px 15px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
         }
 
-        .card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: transform 0.3s ease;
+        .upload-section { 
+            background: #fff; 
+            padding: 25px; 
+            border-radius: var(--radius); 
+            margin-bottom: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            border: 1px solid #edf2f7; 
         }
-
-        .card:hover {
-            transform: translateY(-4px);
+        .upload-section h3 { margin-bottom: 20px; color: var(--text-main); font-size: 1.2em; }
+        
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 0.85em; font-weight: 700; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; }
+        .form-group input, .form-group textarea { 
+            width: 100%; 
+            padding: 12px 16px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+            font-size: 0.95em; 
+            font-family: inherit;
+            background: #fafafa;
         }
-
-        /* Tata letak gambar */
-        .card-img-container {
-            width: 100%;
-            max-height: 450px;
-            overflow: hidden;
-            background-color: #000;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); background: #fff; }
+        .form-group textarea { resize: vertical; height: 90px; }
+        
+        .auto-age-preview { font-size: 0.85em; color: #d69e2e; font-weight: 700; margin-top: 6px; display: block; }
+        .exif-info { font-size: 0.8em; color: #38a169; font-weight: 700; margin-top: 6px; display: block; }
+        
+        .btn-submit { 
+            background: var(--primary-gradient); 
+            color: #fff; 
+            border: none; 
+            padding: 14px 20px; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            width: 100%; 
+            cursor: pointer; 
+            font-size: 1em; 
+            box-shadow: 0 6px 20px rgba(49, 130, 206, 0.35);
         }
+        .btn-submit:disabled { background: #cbd5e0; box-shadow: none; cursor: not-allowed; }
 
-        .card-img {
-            width: 100%;
-            height: auto;
-            max-height: 450px;
-            object-fit: cover;
-            display: block;
-            transition: transform 0.3s;
+        .section-title { font-size: 1.3em; color: var(--text-main); margin-bottom: 20px; font-weight: 700; }
+        
+        .card { 
+            background: var(--card-bg); 
+            border-radius: var(--radius); 
+            overflow: hidden; 
+            margin-bottom: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            border: 1px solid rgba(0,0,0,0.04);
         }
-
-        .card-img-container:hover .card-img {
-            transform: scale(1.02);
-        }
-
-        /* Grid foto jika lebih dari 1 */
+        
         .photo-gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 4px;
-            background-color: #fff;
-            max-height: 350px;
-            overflow-y: auto;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 6px;
+            background: #e2e8f0;
+            padding: 6px;
         }
 
-        .photo-gallery-grid .card-img-container {
-            height: 150px;
-        }
-        .photo-gallery-grid .card-img {
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        .meta-info {
+        .card-img-container {
+            width: 100%;
+            background: #edf2f7;
             display: flex;
-            justify-content: space-between;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .card-title {
-            margin: 0 0 10px 0;
-            font-size: 1.4rem;
-            color: var(--text-main);
-        }
-
-        .card-story {
-            margin: 0 0 15px 0;
-            font-size: 1rem;
-            line-height: 1.6;
-            color: #57606f;
-            white-space: pre-line;
-        }
-
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            border-top: 1px solid #f1f2f6;
-            padding-top: 12px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            height: 180px;
         }
 
-        .location-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+        .single-photo .card-img-container { height: auto; max-height: 550px; }
+        .card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .single-photo .card-img { object-fit: contain; }
+
+        .card-body { padding: 22px; }
+        
+        .meta-info { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            font-size: 0.8em; 
+            color: #2b6cb0; 
+            background: #ebf8ff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-weight: 700; 
+            margin-bottom: 14px; 
+            border: 1px solid #bee3f8;
         }
 
-        /* Bagian Admin Aksi */
-        .admin-action-box {
-            margin-top: 15px;
-            padding-top: 12px;
-            border-top: 1px dashed #dfe4ea;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+        .card-title { font-size: 1.25em; color: var(--text-main); margin-bottom: 10px; font-weight: 700; }
+        .card-story { line-height: 1.7; color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; white-space: pre-line; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #edf2f7; padding-top: 15px; }
+        .location-tag { font-size: 0.85em; color: var(--text-muted); font-weight: 500; }
+        
+        .admin-action-box { display: none; margin-top: 15px; border-top: 1px dashed #cbd5e0; padding-top: 15px; }
 
         .admin-sub-btn {
-            background-color: #f1f2f6;
-            color: #2f3542;
-            border: 1px solid #ced6e0;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-        .admin-sub-btn:hover {
-            background-color: #dfe4ea;
+            background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea;
+            padding: 10px 14px; border-radius: 10px; font-size: 0.85em; font-weight: 700;
+            cursor: pointer; width: 100%; margin-bottom: 8px;
         }
 
-        .admin-delete-btn {
-            background-color: #ff4757;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-        .admin-delete-btn:hover {
-            background-color: #ff6b81;
+        .admin-delete-btn { 
+            background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; 
+            padding: 8px 14px; border-radius: 10px; font-size: 0.8em; font-weight: 700; 
+            cursor: pointer; width: 100%;
         }
 
-        .status-msg {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            margin-top: 40px;
-        }
+        .status-msg { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500; }
 
-        /* Modal / Pop-up Gambar Fullscreen */
-        #imageModal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+        .image-modal {
+            display: none; position: fixed; z-index: 9999; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(8px); align-items: center; justify-content: center;
         }
-
-        #modalImage {
-            max-width: 90%;
-            max-height: 80vh;
-            border-radius: 8px;
-            object-fit: contain;
+        .modal-content { max-width: 95%; max-height: 85vh; object-fit: contain; border-radius: 12px; }
+        .modal-close { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; z-index: 10001; }
+        .modal-nav-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2); color: white; border: none;
+            font-size: 24px; padding: 12px; border-radius: 50%; cursor: pointer; z-index: 10000;
         }
-
-        .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            color: #fff;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .modal-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            font-size: 24px;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 50%;
-            transition: background 0.2s;
-        }
-        .modal-nav:hover { background: rgba(255, 255, 255, 0.4); }
-        #modalPrev { left: 20px; }
-        #modalNext { right: 20px; }
-
-        /* Modal Form / Loading sederhana */
-        .popup-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
-            box-sizing: border-box;
-        }
-        .popup-box {
-            background: #fff;
-            padding: 25px;
-            border-radius: 15px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        .popup-box h3 { margin-top: 0; color: var(--primary-color); }
-        .popup-box input, .popup-box textarea {
-            width: 100%; padding: 10px; margin: 8px 0 15px 0;
-            border: 1px solid #ced6e0; border-radius: 8px; box-sizing: border-box;
-            font-family: inherit;
-        }
-        .popup-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-nav-prev { left: 15px; }
+        .modal-nav-next { right: 15px; }
+        .modal-counter { position: absolute; bottom: 20px; color: white; font-size: 0.9em; font-weight: 600; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Album Kenangan Kita ✨</h1>
-        <p>Kumpulan momen berharga yang diabadikan bersama</p>
-        <div class="controls-bar" style="margin-top: 20px;">
-            <button class="btn" onclick="window.location.href='form.html'">➕ Tambah Kenangan Baru</button>
-            <button class="btn btn-secondary" id="adminToggleBtn" onclick="toggleAdminMode()">🔐 Mode Admin</button>
+    <div class="container">
+        <header>
+            <button class="admin-toggle-btn" onclick="toggleAdminMode()" id="adminBtn">🔒 Admin</button>
+            <h1>Album Kenangan Si Kecil 👶✨</h1>
+            <p>Jurnal tumbuh kembang dan momen berharga penuh cinta</p>
+        </header>
+
+        <div class="child-info-card">
+            <h2 id="childNameDisplay">👶 Si Kecil</h2>
+            <p id="childParentsDisplay">Buah hati tercinta</p>
+            
+            <label for="selectChildFront" style="font-size: 0.8em; color: var(--text-muted); display: block; margin-top: 12px; font-weight: 600;">PILIH ANGGOTA KELUARGA / ANAK:</label>
+            <select id="selectChildFront" class="child-select-front" onchange="changeActiveChild(this.value)"></select>
         </div>
-    </header>
 
-    <div class="container" id="album-list">
-        <div class="status-msg">Memuat album kenangan... ✨</div>
-    </div>
+        <div id="adminPanel" class="admin-only">
+            <div class="profile-section">
+                <h4>⚙️ Kelola Profil Anak (Admin)</h4>
+                <button class="btn-add-child" onclick="addNewChild()">➕ Tambah Anak Baru</button>
 
-    <!-- Modal Lightbox Foto -->
-    <div id="imageModal" onclick="closeModal()">
-        <span class="modal-close">&times;</span>
-        <button class="modal-nav" id="modalPrev" onclick="event.stopPropagation(); changeModalSlide(-1)">&#10094;</button>
-        <img id="modalImage" src="" alt="Zoom">
-        <button class="modal-nav" id="modalNext" onclick="event.stopPropagation(); changeModalSlide(1)">&#10095;</button>
-    </div>
+                <label for="selectChildAdmin">Pilih Anak yang Diubah:</label>
+                <select id="selectChildAdmin" onchange="changeActiveChild(this.value)"></select>
 
-    <!-- Modal Tambah Foto Susulan -->
-    <div id="addPhotoModal" class="popup-overlay">
-        <div class="popup-box">
-            <h3>Tambah Foto ke Momen</h3>
-            <p style="font-size: 0.9rem; color: #747d8c;">Pilih foto tambahan untuk momen ini:</p>
-            <input type="file" id="additionalFileInput" accept="image/*">
-            <div class="popup-actions">
-                <button class="btn btn-secondary" onclick="closeAddPhotoModal()">Batal</button>
-                <button class="btn" id="submitPhotoBtn" onclick="uploadAdditionalPhoto()">Unggah</button>
+                <label for="childName">Nama Anak:</label>
+                <input type="text" id="childName" placeholder="Contoh: Muhammad Azka" onchange="saveCurrentChildProfile()">
+
+                <label for="childParents">Putra/Putri Dari (Pasangan):</label>
+                <input type="text" id="childParents" placeholder="Contoh: Budi & Siti" onchange="saveCurrentChildProfile()">
+
+                <label for="dob">🎂 Tanggal Lahir Anak:</label>
+                <input type="date" id="dob" onchange="saveCurrentChildProfile()">
+            </div>
+
+            <div class="upload-section">
+                <h3>➕ Tambah Kenangan Baru</h3>
+                <form id="uploadForm" onsubmit="handleFormSubmit(event)">
+                    <div class="form-group">
+                        <label>Pilih Foto Original:</label>
+                        <input type="file" id="fotoFile" accept="image/*" onchange="detectPhotoDate(this)" required>
+                        <span id="exifNotice" class="exif-info"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Judul Momen:</label>
+                        <input type="text" id="judul" placeholder="Contoh: Jalan-jalan ke Kebun Binatang" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal Momen Foto Taken:</label>
+                        <input type="date" id="tanggalFoto" onchange="calculateAutoAge()" required>
+                        <span id="calculatedAge" class="auto-age-preview"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Lokasi (Opsional):</label>
+                        <input type="text" id="lokasi" placeholder="Contoh: Taman Kota">
+                    </div>
+                    <div class="form-group">
+                        <label>Cerita Kenangan:</label>
+                        <textarea id="cerita" placeholder="Tuliskan cerita lengkap kenangan manis ini..."></textarea>
+                    </div>
+                    <button type="submit" id="btnSubmit" class="btn-submit">📤 Simpan ke Album</button>
+                </form>
             </div>
         </div>
+
+        <h3 class="section-title">📸 Galeri Kenangan</h3>
+        <div id="album-list" class="status-msg">Memuat album kenangan... ✨</div>
+    </div>
+
+    <!-- Input tersembunyi untuk tambah foto (mendukung multiple files) -->
+    <input type="file" id="additionalPhotoInput" accept="image/*" multiple style="display:none" onchange="handleAdditionalPhotos(this)">
+
+    <div id="imageModal" class="image-modal">
+        <span class="modal-close" onclick="closeModalDirect()">&times;</span>
+        <button class="modal-nav-btn modal-nav-prev" id="btnPrev" onclick="prevImage(event)">❮</button>
+        <img class="modal-content" id="modalImg">
+        <button class="modal-nav-btn modal-nav-next" id="btnNext" onclick="nextImage(event)">❯</button>
+        <div class="modal-counter" id="modalCounter"></div>
     </div>
 
     <script>
-        // ==========================================
-        // KONFIGURASI URL (Sesuaikan milik Anda)
-        // ==========================================
-        const SPREADSHEET_ID = "1gM5S2Zg7c34VfQk28v9r7k8yX1pW0mN7fL4q3j2h1k0"; // Sesuaikan ID Spreadsheet Anda jika perlu
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzQyX.../exec"; // Ganti dengan URL Web App Apps Script Anda
-        const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv`;
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby51SO8RU6-9liD7jEfL3Af0-IwNZJELY6yD5H7YCzwEANZIF8gFYQ_gJVJ53oOlwEM/exec';
+        const ADMIN_PASSWORD = "azka23";
 
-        let currentModalImages = [];
-        let currentModalIndex = 0;
-        let selectedTargetIdForPhoto = "";
+        let calculatedUsiaText = "";
+        let targetCardIdForAdd = null;
+        let currentImageGroup = [];
+        let currentImageIndex = 0;
+        let isModalOpen = false;
 
-        document.addEventListener("DOMContentLoaded", () => {
-            checkAdminStatus();
+        let childrenData = JSON.parse(localStorage.getItem('children_data')) || [
+            { id: '1', name: 'Si Kecil', parents: '', dob: '' }
+        ];
+        let activeChildId = localStorage.getItem('active_child_id') || childrenData[0].id;
+
+        window.onload = function() {
+            renderChildDropdowns();
+            loadCurrentChildProfile();
+            if (localStorage.getItem('is_admin_logged_in') === 'true') {
+                showAdminUI(true);
+            }
             loadAlbum();
-        });
+        };
 
-        // Toggle Mode Admin
+        window.onpopstate = function() { if (isModalOpen) closeModalUI(); };
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && isModalOpen) closeModalDirect(); });
+
+        function openModalGroup(fileIdsStr, startIndex) {
+            const ids = fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
+            currentImageGroup = ids.map(id => id.includes('http') ? id : `https://lh3.googleusercontent.com/d/${id}`);
+            currentImageIndex = startIndex;
+            updateModalView();
+            document.getElementById('imageModal').style.display = 'flex';
+            if (!isModalOpen) { isModalOpen = true; history.pushState({ modalOpen: true }, ""); }
+        }
+
+        function closeModalDirect() { if (isModalOpen) history.back(); }
+        function closeModalUI() { document.getElementById('imageModal').style.display = 'none'; isModalOpen = false; }
+
+        function updateModalView() {
+            const img = document.getElementById('modalImg');
+            img.src = currentImageGroup[currentImageIndex];
+            const prevBtn = document.getElementById('btnPrev');
+            const nextBtn = document.getElementById('btnNext');
+            const counter = document.getElementById('modalCounter');
+
+            if (currentImageGroup.length > 1) {
+                prevBtn.style.display = 'block'; nextBtn.style.display = 'block'; counter.style.display = 'block';
+                counter.innerText = `${currentImageIndex + 1} / ${currentImageGroup.length}`;
+            } else {
+                prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; counter.style.display = 'none';
+            }
+        }
+
+        function prevImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex > 0) ? currentImageIndex - 1 : currentImageGroup.length - 1; updateModalView(); }
+        function nextImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex < currentImageGroup.length - 1) ? currentImageIndex + 1 : 0; updateModalView(); }
+
+        function renderChildDropdowns() {
+            const frontSelect = document.getElementById('selectChildFront');
+            const adminSelect = document.getElementById('selectChildAdmin');
+            frontSelect.innerHTML = ''; adminSelect.innerHTML = '';
+
+            childrenData.forEach(child => {
+                const opt1 = document.createElement('option'); opt1.value = child.id; opt1.innerText = child.name || 'Si Kecil';
+                if (child.id === activeChildId) opt1.selected = true;
+                frontSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option'); opt2.value = child.id; opt2.innerText = child.name || 'Si Kecil';
+                if (child.id === activeChildId) opt2.selected = true;
+                adminSelect.appendChild(opt2);
+            });
+        }
+
+        function addNewChild() {
+            const name = prompt("Masukkan nama anak baru:");
+            if (!name) return;
+            const newChild = { id: Date.now().toString(), name: name, parents: '', dob: '' };
+            childrenData.push(newChild);
+            activeChildId = newChild.id;
+            saveAllChildrenData();
+            renderChildDropdowns();
+            loadCurrentChildProfile();
+        }
+
+        function changeActiveChild(id) {
+            activeChildId = id;
+            localStorage.setItem('active_child_id', activeChildId);
+            renderChildDropdowns();
+            loadCurrentChildProfile();
+        }
+
+        function loadCurrentChildProfile() {
+            const child = childrenData.find(c => c.id === activeChildId) || childrenData[0];
+            document.getElementById('childName').value = child.name || '';
+            document.getElementById('childParents').value = child.parents || '';
+            document.getElementById('dob').value = child.dob || '';
+            document.getElementById('childNameDisplay').innerText = child.name ? `👶 ${child.name}` : "👶 Si Kecil";
+            document.getElementById('childParentsDisplay').innerText = child.parents ? `Putra/Putri dari: ${child.parents}` : "Buah hati tercinta";
+            calculateAutoAge();
+        }
+
+        function saveCurrentChildProfile() {
+            const childIndex = childrenData.findIndex(c => c.id === activeChildId);
+            if (childIndex !== -1) {
+                childrenData[childIndex].name = document.getElementById('childName').value;
+                childrenData[childIndex].parents = document.getElementById('childParents').value;
+                childrenData[childIndex].dob = document.getElementById('dob').value;
+                saveAllChildrenData();
+                renderChildDropdowns();
+                loadCurrentChildProfile();
+            }
+        }
+
+        function saveAllChildrenData() { localStorage.setItem('children_data', JSON.stringify(childrenData)); }
+
         function toggleAdminMode() {
             const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
             if (isAdmin) {
                 localStorage.setItem('is_admin_logged_in', 'false');
-                alert("Mode Admin dimatikan.");
-                loadAlbum();
+                showAdminUI(false);
             } else {
-                const pin = prompt("Masukkan PIN Admin:");
-                if (pin === "1234") { // Ganti PIN sesuai keinginan Anda
+                const pass = prompt("Masukkan Password Admin:");
+                if (pass === ADMIN_PASSWORD) {
                     localStorage.setItem('is_admin_logged_in', 'true');
-                    alert("Mode Admin diaktifkan!");
-                    loadAlbum();
-                } else if (pin !== null) {
-                    alert("PIN salah!");
-                }
+                    showAdminUI(true);
+                } else if (pass !== null) alert("Password Salah!");
             }
-            checkAdminStatus();
         }
 
-        function checkAdminStatus() {
-            const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
-            const btn = document.getElementById('adminToggleBtn');
-            btn.innerText = isAdmin ? "🔓 Keluar Admin" : "🔐 Mode Admin";
-            btn.style.backgroundColor = isAdmin ? "#2ed573" : "#747d8c";
+        function showAdminUI(show) {
+            document.getElementById('adminPanel').style.display = show ? 'block' : 'none';
+            document.getElementById('adminBtn').innerText = show ? '🔓 Keluar Admin' : '🔒 Admin';
+            document.querySelectorAll('.admin-action-box').forEach(box => box.style.display = show ? 'block' : 'none');
         }
 
-        // Fungsi parsing CSV standar
-        function parseCSV(text) {
-            let lines = text.split("\n");
-            let result = [];
-            let currentLine = [];
-            let inQuotes = false;
-            let value = "";
+        function detectPhotoDate(input) {
+            const file = input.files[0];
+            const notice = document.getElementById('exifNotice');
+            if (!file) return;
 
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                let nextChar = text[i + 1];
+            EXIF.getData(file, function() {
+                const exifDate = EXIF.getTag(this, "DateTimeOriginal");
+                if (exifDate) {
+                    const parts = exifDate.split(" ");
+                    const dateParts = parts[0].split(":");
+                    document.getElementById('tanggalFoto').value = `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}`;
+                    notice.innerText = "✨ Tanggal foto terdeteksi otomatis!";
+                    calculateAutoAge();
+                } else { notice.innerText = ""; }
+            });
+        }
 
-                if (char === '"') {
-                    if (inQuotes && nextChar === '"') {
-                        value += '"';
-                        i++;
-                    } else {
-                        inQuotes = !inQuotes;
-                    }
-                } else if (char === ',' && !inQuotes) {
-                    currentLine.push(value);
-                    value = "";
-                } else if ((char === '\r' || char === '\n') && !inQuotes) {
-                    if (char === '\r' && nextChar === '\n') { i++; }
-                    currentLine.push(value);
-                    result.push(currentLine);
-                    currentLine = [];
-                    value = "";
-                } else {
-                    value += char;
-                }
-            }
-            if (value !== "" || currentLine.length > 0) {
-                currentLine.push(value);
-                result.push(currentLine);
-            }
-            return result;
+        function calculateAutoAge() {
+            const dobVal = document.getElementById('dob').value;
+            const photoDateVal = document.getElementById('tanggalFoto').value;
+            const output = document.getElementById('calculatedAge');
+
+            if (!dobVal || !photoDateVal) { output.innerText = ""; calculatedUsiaText = ""; return; }
+
+            const birth = new Date(dobVal);
+            const photo = new Date(photoDateVal);
+
+            let years = photo.getFullYear() - birth.getFullYear();
+            let months = photo.getMonth() - birth.getMonth();
+            let days = photo.getDate() - birth.getDate();
+
+            if (days < 0) { months--; days += new Date(photo.getFullYear(), photo.getMonth(), 0).getDate(); }
+            if (months < 0) { years--; months += 12; }
+
+            let result = "Usia saat foto: ";
+            if (years > 0) result += `${years} Tahun `;
+            if (months > 0) result += `${months} Bulan `;
+            if (days > 0 || (years === 0 && months === 0)) result += `${days} Hari`;
+
+            output.innerText = result;
+            calculatedUsiaText = result.replace("Usia saat foto: ", "");
         }
 
         function parseIndonesianDate(dateStr) {
-            if (!dateStr) return new Date(0);
-            const months = {
-                'januari': 0, 'februari': 1, 'maret': 2, 'april': 3, 'mei': 4, 'juni': 5,
-                'juli': 6, 'agustus': 7, 'september': 8, 'oktober': 9, 'november': 10, 'desember': 11
-            };
-            try {
-                let parts = dateStr.toLowerCase().trim().split(' ');
-                if (parts.length >= 3) {
-                    let day = parseInt(parts[0]);
-                    let month = months[parts[1]];
-                    let year = parseInt(parts[2]);
-                    if (!isNaN(day) && month !== undefined && !isNaN(year)) {
-                        return new Date(year, month, day);
-                    }
-                }
-            } catch (e) { }
-            let d = new Date(dateStr);
-            return isNaN(d.getTime()) ? new Date(0) : d;
+            if (!dateStr) return 0;
+            let d = new Date(dateStr.trim());
+            if (!isNaN(d.getTime())) return d.getTime();
+            return 0;
         }
 
-        // Memuat Album dari Spreadsheet
         async function loadAlbum() {
             const container = document.getElementById('album-list');
             container.className = 'status-msg';
             container.innerText = "Memuat album kenangan... ✨";
 
             try {
+                // Parameter anti-cache ganda agar browser dan Google Sheets selalu merespons data terbaru
                 const antiCacheUrl = SHEET_CSV_URL + '&t=' + new Date().getTime() + '&nocache=' + Math.random();
                 const response = await fetch(antiCacheUrl);
                 const csvText = await response.text();
@@ -520,7 +588,6 @@
                     }
 
                     const card = document.createElement('div');
-                    card.id = `card-${item.id}`; // ID unik untuk DOM penghapusan instan
                     card.className = `card ${ids.length === 1 ? 'single-photo' : ''}`;
                     card.innerHTML = `
                         ${galleryHtml}
@@ -534,9 +601,9 @@
                             <div class="card-footer">
                                 <span class="location-tag">${item.lokasi ? `📍 ${item.lokasi}` : ''}</span>
                             </div>
-                            <div class="admin-action-box" style="display: ${isAdmin ? 'flex' : 'none'};">
-                                <button class="admin-sub-btn" onclick="triggerAddPhotos('${item.id}')">➕ Tambah Foto</button>
-                                <button class="admin-delete-btn" onclick="deleteMemory('${item.id}')">🗑️ Hapus Kenangan</button>
+                            <div class="admin-action-box" style="display: ${isAdmin ? 'block' : 'none'};">
+                                <button class="admin-sub-btn" onclick="triggerAddPhotos('${item.id}')">➕ Tambah Foto ke Momen Ini</button>
+                                <button class="admin-delete-btn" onclick="deleteMemory('${item.id}')">🗑️ Hapus Kenangan Ini</button>
                             </div>
                         </div>
                     `;
@@ -549,19 +616,113 @@
             }
         }
 
-        // Fitur Hapus Kenangan dengan Penghapusan Elemen Instan
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(l => l.trim() !== '');
+            const results = [];
+            for (let i = 0; i < lines.length; i++) {
+                const matches = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                if (matches) {
+                    results.push(matches.map(val => val.replace(/^"|"$/g, '').replace(/""/g, '"')));
+                }
+            }
+            return results;
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            const fileInput = document.getElementById('fotoFile');
+            if (!fileInput.files || fileInput.files.length === 0) return;
+
+            btn.disabled = true;
+            btn.innerText = "📤 Mengunggah Foto...";
+
+            try {
+                const file = fileInput.files[0];
+                const base64Data = await convertFileToBase64(file);
+
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'saveData',
+                        judul: document.getElementById('judul').value,
+                        tanggal: document.getElementById('tanggalFoto').value,
+                        lokasi: document.getElementById('lokasi').value,
+                        usia: calculatedUsiaText,
+                        cerita: document.getElementById('cerita').value,
+                        fileName: file.name, mimeType: file.type, fileData: base64Data
+                    })
+                });
+
+                alert("Kenangan berhasil disimpan! ✨");
+                document.getElementById('uploadForm').reset();
+                document.getElementById('calculatedAge').innerText = "";
+                document.getElementById('exifNotice').innerText = "";
+                setTimeout(loadAlbum, 3500);
+            } catch (err) {
+                alert("Gagal mengunggah kenangan.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "📤 Simpan ke Album";
+            }
+        }
+
+        function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function triggerAddPhotos(id) {
+            targetCardIdForAdd = id;
+            document.getElementById('additionalPhotoInput').click();
+        }
+
+        // Fungsi penambahan foto berurutan (sequential loop) agar stabil untuk multiple file
+        async function handleAdditionalPhotos(input) {
+            if (!input.files || input.files.length === 0 || !targetCardIdForAdd) return;
+
+            const files = input.files;
+            alert(`Mulai mengunggah ${files.length} foto tambahan... Mohon tunggu sampai selesai ⏳`);
+
+            try {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const base64Data = await convertFileToBase64(file);
+
+                    await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'addPhoto', 
+                            id: targetCardIdForAdd,
+                            fileName: file.name, 
+                            mimeType: file.type, 
+                            fileData: base64Data
+                        })
+                    });
+
+                    // Jeda sejenak antar file agar server Apps Script stabil
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                }
+
+                alert("Semua foto tambahan berhasil diunggah! ✨");
+                input.value = "";
+                setTimeout(loadAlbum, 3000);
+            } catch (err) {
+                alert("Gagal mengunggah foto tambahan.");
+                console.error(err);
+            }
+        }
+
         async function deleteMemory(id) {
             if (!confirm("Yakin ingin menghapus kenangan ini?")) return;
-            
-            // Langsung sembunyikan kartu dari layar secara instan tanpa menunggu jeda server
-            const cardElement = document.getElementById(`card-${id}`);
-            if (cardElement) {
-                cardElement.style.transition = 'all 0.4s ease';
-                cardElement.style.opacity = '0';
-                cardElement.style.transform = 'scale(0.9)';
-                setTimeout(() => cardElement.remove(), 400);
-            }
-
             try {
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
@@ -569,93 +730,14 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: 'delete', id: id })
                 });
+                
+                alert("Perintah hapus dikirim. Memperbarui galeri...");
+                // Jeda 3 detik agar Google Spreadsheet selesai membersihkan baris secara fisik
+                setTimeout(loadAlbum, 3000);
             } catch (err) {
-                console.error("Gagal mengirim perintah hapus:", err);
+                alert("Gagal menghapus.");
+                console.error(err);
             }
-        }
-
-        // Modal Zoom Foto Group
-        function openModalGroup(idsString, index) {
-            currentModalImages = idsString.split(',').map(s => s.trim());
-            currentModalIndex = index;
-            updateModalImage();
-            document.getElementById('imageModal').style.display = 'flex';
-        }
-
-        function updateModalImage() {
-            const imgId = currentModalImages[currentModalIndex];
-            const imgUrl = imgId.includes('http') ? imgId : `https://lh3.googleusercontent.com/d/${imgId}`;
-            document.getElementById('modalImage').src = imgUrl;
-            
-            document.getElementById('modalPrev').style.display = currentModalImages.length > 1 ? 'block' : 'none';
-            document.getElementById('modalNext').style.display = currentModalImages.length > 1 ? 'block' : 'none';
-        }
-
-        function changeModalSlide(direction) {
-            currentModalIndex += direction;
-            if (currentModalIndex < 0) currentModalIndex = currentModalImages.length - 1;
-            if (currentModalIndex >= currentModalImages.length) currentModalIndex = 0;
-            updateModalImage();
-        }
-
-        function closeModal() {
-            document.getElementById('imageModal').style.display = 'none';
-        }
-
-        // Tambah Foto Susulan
-        function triggerAddPhotos(id) {
-            selectedTargetIdForPhoto = id;
-            document.getElementById('additionalFileInput').value = "";
-            document.getElementById('addPhotoModal').style.display = 'flex';
-        }
-
-        function closeAddPhotoModal() {
-            document.getElementById('addPhotoModal').style.display = 'none';
-        }
-
-        async function uploadAdditionalPhoto() {
-            const fileInput = document.getElementById('additionalFileInput');
-            if (fileInput.files.length === 0) {
-                alert("Pilih file foto terlebih dahulu!");
-                return;
-            }
-
-            const file = fileInput.files[0];
-            const btn = document.getElementById('submitPhotoBtn');
-            btn.innerText = "Mengunggah...";
-            btn.disabled = true;
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async function () {
-                const base64Data = reader.result.split(',')[1];
-                const payload = {
-                    action: 'addPhoto',
-                    id: selectedTargetIdForPhoto,
-                    fileName: file.name,
-                    mimeType: file.type,
-                    fileData: base64Data
-                };
-
-                try {
-                    await fetch(WEB_APP_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    alert("Foto berhasil ditambahkan!");
-                    closeAddPhotoModal();
-                    setTimeout(() => loadAlbum(), 2000); // Tunggu sebentar lalu muat ulang album
-                } catch (err) {
-                    console.error(err);
-                    alert("Gagal mengunggah foto.");
-                } finally {
-                    btn.innerText = "Unggah";
-                    btn.disabled = false;
-                }
-            };
         }
     </script>
 </body>
