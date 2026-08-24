@@ -189,10 +189,10 @@
         
         .photo-gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 6px;
             background: #e2e8f0;
-            padding: 4px;
+            padding: 6px;
         }
 
         .card-img-container {
@@ -204,7 +204,7 @@
             overflow: hidden;
             cursor: pointer;
             position: relative;
-            height: 220px;
+            height: 180px;
         }
 
         .single-photo .card-img-container { height: auto; max-height: 550px; }
@@ -238,7 +238,7 @@
 
         .admin-sub-btn {
             background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea;
-            padding: 8px 14px; border-radius: 10px; font-size: 0.8em; font-weight: 700;
+            padding: 10px 14px; border-radius: 10px; font-size: 0.85em; font-weight: 700;
             cursor: pointer; width: 100%; margin-bottom: 8px;
         }
 
@@ -306,8 +306,8 @@
                 <h3>➕ Tambah Kenangan Baru</h3>
                 <form id="uploadForm" onsubmit="handleFormSubmit(event)">
                     <div class="form-group">
-                        <label>Pilih Foto Original (Bisa Pilih Beberapa Foto):</label>
-                        <input type="file" id="fotoFile" accept="image/*" multiple onchange="detectPhotoDate(this)" required>
+                        <label>Pilih Foto Original:</label>
+                        <input type="file" id="fotoFile" accept="image/*" onchange="detectPhotoDate(this)" required>
                         <span id="exifNotice" class="exif-info"></span>
                     </div>
                     <div class="form-group">
@@ -336,7 +336,8 @@
         <div id="album-list" class="status-msg">Memuat album kenangan... ✨</div>
     </div>
 
-    <input type="file" id="additionalPhotoInput" accept="image/*" multiple style="display:none" onchange="handleAdditionalPhotos(this)">
+    <!-- Input file tersembunyi untuk fitur tambah foto tambahan -->
+    <input type="file" id="additionalPhotoInput" accept="image/*" style="display:none" onchange="handleAdditionalPhotos(this)">
 
     <div id="imageModal" class="image-modal">
         <span class="modal-close" onclick="closeModalDirect()">&times;</span>
@@ -348,7 +349,7 @@
 
     <script>
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby4EiH2AxOYaGX3DDpri-3Fhw_VG8LW54Kz9b7PHJQOxNGr4mheifOE7dO8ECytzRkybw/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwV_s-Df3HOrWjdh9Z-mVQvEWWvqpHdvdGaml4vPlM37tXsDIsRQtZgm4mmIhjEEC2Tkw/exec';
         const ADMIN_PASSWORD = "azka23";
 
         let calculatedUsiaText = "";
@@ -372,7 +373,7 @@
             loadAlbum();
         };
 
-        // FITUR KEMBALI (BACK) HP SUPAYA TIDAK KELUAR APLIKASI SAAT VIEW FOTO
+        // KEMBALI DARI VIEW MODAL TANPA KELUAR APLIKASI
         window.onpopstate = function(event) {
             if (isModalOpen) {
                 closeModalUI();
@@ -574,6 +575,7 @@
             calculatedUsiaText = result.replace("Usia saat foto: ", "");
         }
 
+        // FUNGSI MEMUAT & MENGURUTKAN KRONOLOGIS
         async function loadAlbum() {
             const container = document.getElementById('album-list');
             container.className = 'status-msg';
@@ -589,7 +591,6 @@
                     return;
                 }
 
-                // EKSTRAKSI & PEMBERSIHAN DATA
                 let items = [];
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
@@ -601,6 +602,17 @@
 
                     if (!id || !judul) continue;
 
+                    // Mengurai Tanggal untuk Urutan Kronologis Akurat
+                    let timeVal = 0;
+                    if (tanggal) {
+                        const parsedDate = new Date(tanggal);
+                        if (!isNaN(parsedDate.getTime())) {
+                            timeVal = parsedDate.getTime();
+                        } else {
+                            timeVal = new Date(tanggal.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$2-$1")).getTime() || 0;
+                        }
+                    }
+
                     items.push({
                         id: id,
                         tanggal: tanggal,
@@ -610,13 +622,12 @@
                         usia: row[5] || "",
                         fileUrl: row[6] || "",
                         fileIdsStr: row[7] || row[6] || "",
-                        // Ambil timestamp untuk pengurutan tanggal
-                        dateObj: new Date(tanggal).getTime() || 0
+                        dateTime: timeVal
                     });
                 }
 
-                // URUTKAN BERDASARKAN TANGGAL FOTO (TERBARU DI ATAS)
-                items.sort((a, b) => b.dateObj - a.dateObj);
+                // URUTKAN: TERBARU DI ATAS, TERLAMA DI BAWAH
+                items.sort((a, b) => b.dateTime - a.dateTime);
 
                 if (items.length === 0) {
                     container.className = 'status-msg';
@@ -630,8 +641,8 @@
                 const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
 
                 items.forEach(item => {
-                    // Bersihkan daftar ID foto tambahan dari spasi/karakter tersembunyi
-                    const ids = item.fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
+                    const rawIds = item.fileIdsStr ? item.fileIdsStr.split(',') : [];
+                    const ids = rawIds.map(s => s.trim()).filter(Boolean);
 
                     let galleryHtml = "";
                     if (ids.length === 1) {
@@ -736,7 +747,7 @@
                 document.getElementById('uploadForm').reset();
                 document.getElementById('calculatedAge').innerText = "";
                 document.getElementById('exifNotice').innerText = "";
-                setTimeout(loadAlbum, 3000);
+                setTimeout(loadAlbum, 3500);
 
             } catch (err) {
                 alert("Gagal mengunggah kenangan.");
@@ -764,6 +775,7 @@
             if (!input.files || input.files.length === 0 || !targetCardIdForAdd) return;
 
             const file = input.files[0];
+            alert("Mengunggah foto tambahan, mohon tunggu sebentar... ⏳");
             const base64Data = await convertFileToBase64(file);
 
             const payload = {
@@ -782,15 +794,16 @@
                     body: JSON.stringify(payload)
                 });
 
-                alert("Foto tambahan berhasil diunggah! ✨");
-                setTimeout(loadAlbum, 3000);
+                alert("Foto tambahan berhasil diunggah! ✨ Halaman akan diperbarui.");
+                input.value = "";
+                setTimeout(loadAlbum, 3500);
             } catch (err) {
                 alert("Gagal mengunggah foto tambahan.");
             }
         }
 
         async function deleteMemory(id) {
-            if (!id || id === 'undefined') {
+            if (!id) {
                 alert("Kenangan ini tidak memiliki ID valid.");
                 return;
             }
@@ -806,7 +819,7 @@
                 });
 
                 alert("Kenangan berhasil dihapus! ✨");
-                setTimeout(loadAlbum, 3000);
+                setTimeout(loadAlbum, 3500);
             } catch (err) {
                 alert("Gagal menghapus.");
             }
