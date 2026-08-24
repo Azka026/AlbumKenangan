@@ -1,459 +1,758 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Album Kenangan Keluarga</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    /* Style kustom untuk slider foto */
-    .slider-container {
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-      border-radius: 0.5rem;
-    }
-    .slider-track {
-      display: flex;
-      transition: transform 0.3s ease-in-out;
-      width: 100%;
-    }
-    .slide-img {
-      min-width: 100%;
-      max-height: 450px;
-      object-fit: contain;
-      background-color: #000;
-    }
-  </style>
-</head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
-
-  <!-- Header / Navbar -->
-  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 shadow-md">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl md:text-2xl font-bold text-amber-400 flex items-center gap-2">
-        <i class="fa-solid font-camera"></i> Album Kenangan
-      </h1>
-      <button id="adminBtn" onclick="toggleAdminMode()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-lg text-sm transition font-medium border border-slate-600 flex items-center gap-2">
-        <i class="fa-solid fa-lock"></i> <span id="adminBtnText">Mode Admin</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- Main Container -->
-  <main class="max-w-6xl mx-auto px-4 py-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Album Kenangan Si Kecil 👶✨</title>
     
-    <!-- Panel Tambah Data (Mode Admin Only) -->
-    <div id="adminPanel" class="hidden bg-slate-800 border border-amber-500/30 p-6 rounded-xl mb-8 shadow-lg">
-      <h2 class="text-lg font-semibold text-amber-400 mb-4 flex items-center gap-2">
-        <i class="fa-solid fa-plus-circle"></i> Tambah Kenangan Baru
-      </h2>
-      <form id="uploadForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Judul Kenangan</label>
-            <input type="text" id="inputJudul" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:border-amber-400 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Tanggal</label>
-            <input type="date" id="inputTanggal" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:border-amber-400 focus:outline-none">
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Lokasi</label>
-            <input type="text" id="inputLokasi" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:border-amber-400 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Usia / Momen</label>
-            <input type="text" id="inputUsia" placeholder="misal: 5 Tahun" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:border-amber-400 focus:outline-none">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs text-slate-400 mb-1">Cerita / Catatan</label>
-          <textarea id="inputCerita" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:border-amber-400 focus:outline-none"></textarea>
-        </div>
-        <div>
-          <label class="block text-xs text-slate-400 mb-1">Pilih Foto Utama</label>
-          <input type="file" id="inputFile" accept="image/*" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:bg-amber-500 file:text-slate-900 hover:file:bg-amber-400">
-        </div>
-        <button type="submit" id="btnSubmit" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold px-6 py-2.5 rounded-lg text-sm transition flex items-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up"></i> Simpan Kenangan
-        </button>
-      </form>
-    </div>
+    <meta name="theme-color" content="#3182ce">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Album Kecil">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2922/2922506.png">
 
-    <!-- Grid Kenangan -->
-    <div id="loading" class="text-center py-12 text-slate-400">
-      <i class="fa-solid fa-spinner fa-spin text-3xl text-amber-400 mb-2"></i>
-      <p>Memuat kenangan indah...</p>
-    </div>
+    <link rel="manifest" href="./manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 
-    <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-  </main>
+    <style>
+        :root {
+            --primary: #3182ce;
+            --primary-gradient: linear-gradient(135deg, #2b6cb0 0%, #4299e1 100%);
+            --secondary: #319795;
+            --bg-color: #f7fafc;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --radius: 20px;
+        }
 
-  <!-- Modal Detail & Slider Foto -->
-  <div id="detailModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
-      <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl z-10">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <!-- Slider Container -->
-      <div class="slider-container bg-black mb-4 group">
-        <div id="sliderTrack" class="slider-track"></div>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        <!-- Navigation Buttons -->
-        <button id="prevBtn" onclick="moveSlide(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full hidden">
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <button id="nextBtn" onclick="moveSlide(1)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full hidden">
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
-      </div>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            padding: 20px 15px 90px 15px; 
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-      <!-- Indikator Slide/Dots -->
-      <div id="slideDots" class="flex justify-center gap-2 mb-4"></div>
+        .container { max-width: 750px; margin: 0 auto; }
+        
+        header { 
+            text-align: center; 
+            padding: 35px 20px; 
+            background: var(--primary-gradient); 
+            color: white;
+            border-radius: var(--radius); 
+            margin-bottom: 20px; 
+            box-shadow: 0 10px 25px rgba(49, 130, 206, 0.25); 
+            position: relative; 
+        }
 
-      <!-- Tombol Tambah Foto (Admin Only) -->
-      <div id="addPhotoContainer" class="hidden mb-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700">
-        <label class="block text-xs text-amber-400 font-medium mb-1">+ Tambah Foto Lagi ke Momen Ini</label>
-        <div class="flex gap-2">
-          <input type="file" id="addPhotoInput" accept="image/*" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-slate-700 file:text-slate-200">
-          <button onclick="uploadAdditionalPhoto()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs px-3 py-1 rounded font-semibold transition">Unggah</button>
+        header h1 { font-size: 1.8em; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+        header p { font-size: 0.95em; opacity: 0.9; font-weight: 400; }
+        
+        .child-info-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        .child-info-card h2 { font-size: 1.4em; color: var(--primary); font-weight: 700; margin-bottom: 6px; }
+        .child-info-card p { font-size: 0.9em; color: var(--text-muted); line-height: 1.5; }
+
+        .child-select-front {
+            margin-top: 12px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e0;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--text-main);
+            background: #f8fafc;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .admin-toggle-btn { 
+            position: absolute; 
+            top: 15px; 
+            right: 15px; 
+            background: rgba(255, 255, 255, 0.25); 
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.4); 
+            padding: 6px 14px; 
+            border-radius: 30px; 
+            font-size: 0.75em; 
+            cursor: pointer; 
+            color: white; 
+            font-weight: 600; 
+            transition: all 0.2s;
+        }
+
+        .admin-only { display: none; animation: fadeIn 0.3s ease; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .profile-section { 
+            background: #fff; 
+            border: 1px solid #edf2f7; 
+            padding: 20px; 
+            border-radius: var(--radius); 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+        .profile-section h4 { font-size: 1em; color: var(--primary); margin-bottom: 15px; font-weight: 700; }
+        .profile-section label { font-size: 0.8em; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .profile-section input, .profile-section select { 
+            padding: 10px 14px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 10px; 
+            font-size: 0.9em; 
+            width: 100%; 
+            margin-bottom: 12px;
+        }
+
+        .btn-add-child {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85em;
+            cursor: pointer;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .upload-section { 
+            background: #fff; 
+            padding: 25px; 
+            border-radius: var(--radius); 
+            margin-bottom: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            border: 1px solid #edf2f7; 
+        }
+        .upload-section h3 { margin-bottom: 20px; color: var(--text-main); font-size: 1.2em; display: flex; align-items: center; gap: 8px; }
+        
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 0.85em; font-weight: 700; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group textarea { 
+            width: 100%; 
+            padding: 12px 16px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+            font-size: 0.95em; 
+            font-family: inherit;
+            background: #fafafa;
+        }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); background: #fff; }
+        .form-group textarea { resize: vertical; height: 90px; }
+        
+        .auto-age-preview { font-size: 0.85em; color: #d69e2e; font-weight: 700; margin-top: 6px; display: block; }
+        .exif-info { font-size: 0.8em; color: #38a169; font-weight: 700; margin-top: 6px; display: block; }
+        
+        .btn-submit { 
+            background: var(--primary-gradient); 
+            color: #fff; 
+            border: none; 
+            padding: 14px 20px; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            width: 100%; 
+            cursor: pointer; 
+            font-size: 1em; 
+            box-shadow: 0 6px 20px rgba(49, 130, 206, 0.35);
+        }
+        .btn-submit:disabled { background: #cbd5e0; box-shadow: none; cursor: not-allowed; }
+
+        .section-title { font-size: 1.3em; color: var(--text-main); margin-bottom: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        
+        .card { 
+            background: var(--card-bg); 
+            border-radius: var(--radius); 
+            overflow: hidden; 
+            margin-bottom: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        
+        .photo-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 6px;
+            background: #e2e8f0;
+            padding: 4px;
+        }
+
+        .card-img-container {
+            width: 100%;
+            background: #edf2f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            height: 220px;
+        }
+
+        .single-photo .card-img-container { height: auto; max-height: 550px; }
+        .card-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease; }
+        .single-photo .card-img { object-fit: contain; }
+
+        .card-body { padding: 22px; }
+        
+        .meta-info { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            font-size: 0.8em; 
+            color: #2b6cb0; 
+            background: #ebf8ff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-weight: 700; 
+            margin-bottom: 14px; 
+            align-items: center;
+            border: 1px solid #bee3f8;
+        }
+
+        .card-title { font-size: 1.25em; color: var(--text-main); margin-bottom: 10px; font-weight: 700; }
+        .card-story { line-height: 1.7; color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; white-space: pre-line; }
+        
+        .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #edf2f7; padding-top: 15px; }
+        .location-tag { font-size: 0.85em; color: var(--text-muted); font-weight: 500; }
+        
+        .admin-action-box { display: none; margin-top: 15px; border-top: 1px dashed #cbd5e0; padding-top: 15px; }
+
+        .admin-sub-btn {
+            background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea;
+            padding: 8px 14px; border-radius: 10px; font-size: 0.8em; font-weight: 700;
+            cursor: pointer; width: 100%; margin-bottom: 8px;
+        }
+
+        .admin-delete-btn { 
+            background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; 
+            padding: 8px 14px; border-radius: 10px; font-size: 0.8em; font-weight: 700; 
+            cursor: pointer; width: 100%;
+        }
+
+        .status-msg { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500; }
+
+        .image-modal {
+            display: none; position: fixed; z-index: 9999; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(8px); align-items: center; justify-content: center;
+        }
+        .modal-content { max-width: 95%; max-height: 85vh; object-fit: contain; border-radius: 12px; }
+        .modal-close { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; z-index: 10001; }
+        .modal-nav-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2); color: white; border: none;
+            font-size: 24px; padding: 12px; border-radius: 50%; cursor: pointer; z-index: 10000;
+        }
+        .modal-nav-prev { left: 15px; }
+        .modal-nav-next { right: 15px; }
+        .modal-counter { position: absolute; bottom: 20px; color: white; font-size: 0.9em; font-weight: 600; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <button class="admin-toggle-btn" onclick="toggleAdminMode()" id="adminBtn">🔒 Admin</button>
+            <h1>Album Kenangan Si Kecil 👶✨</h1>
+            <p>Jurnal tumbuh kembang dan momen berharga penuh cinta</p>
+        </header>
+
+        <div class="child-info-card">
+            <h2 id="childNameDisplay">👶 Si Kecil</h2>
+            <p id="childParentsDisplay">Buah hati tercinta</p>
+            
+            <label for="selectChildFront" style="font-size: 0.8em; color: var(--text-muted); display: block; margin-top: 12px; font-weight: 600;">PILIH ANGGOTA KELUARGA / ANAK:</label>
+            <select id="selectChildFront" class="child-select-front" onchange="changeActiveChild(this.value)"></select>
         </div>
-      </div>
 
-      <!-- Info Detail -->
-      <h3 id="modalTitle" class="text-xl font-bold text-amber-400 mb-2"></h3>
-      <div class="flex flex-wrap gap-4 text-xs text-slate-400 mb-4 border-b border-slate-700 pb-3">
-        <span id="modalDate"><i class="fa-regular fa-calendar"></i> -</span>
-        <span id="modalLocation"><i class="fa-solid fa-location-dot"></i> -</span>
-        <span id="modalAge"><i class="fa-solid fa-user"></i> -</span>
-      </div>
-      <p id="modalStory" class="text-slate-300 text-sm whitespace-pre-line leading-relaxed"></p>
+        <div id="adminPanel" class="admin-only">
+            <div class="profile-section">
+                <h4>⚙️ Kelola Profil Anak (Admin)</h4>
+                <button class="btn-add-child" onclick="addNewChild()">➕ Tambah Anak Baru</button>
 
-      <!-- Action Footer (Admin) -->
-      <div id="modalAdminActions" class="hidden mt-6 pt-4 border-t border-slate-700 flex justify-end">
-        <button id="btnDelete" onclick="deleteCurrentItem()" class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 px-4 py-2 rounded-lg text-xs transition flex items-center gap-2">
-          <i class="fa-solid fa-trash"></i> Hapus Momen Ini
-        </button>
-      </div>
+                <label for="selectChildAdmin">Pilih Anak yang Diubah:</label>
+                <select id="selectChildAdmin" onchange="changeActiveChild(this.value)"></select>
+
+                <label for="childName">Nama Anak:</label>
+                <input type="text" id="childName" placeholder="Contoh: Muhammad Azka" onchange="saveCurrentChildProfile()">
+
+                <label for="childParents">Putra/Putri Dari (Pasangan):</label>
+                <input type="text" id="childParents" placeholder="Contoh: Budi & Siti" onchange="saveCurrentChildProfile()">
+
+                <label for="dob">🎂 Tanggal Lahir Anak:</label>
+                <input type="date" id="dob" onchange="saveCurrentChildProfile()">
+            </div>
+
+            <div class="upload-section">
+                <h3>➕ Tambah Kenangan Baru</h3>
+                <form id="uploadForm" onsubmit="handleFormSubmit(event)">
+                    <div class="form-group">
+                        <label>Pilih Foto Original (Bisa Pilih Beberapa Foto):</label>
+                        <input type="file" id="fotoFile" accept="image/*" multiple onchange="detectPhotoDate(this)" required>
+                        <span id="exifNotice" class="exif-info"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Judul Momen:</label>
+                        <input type="text" id="judul" placeholder="Contoh: Jalan-jalan ke Kebun Binatang" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal Momen Foto Taken:</label>
+                        <input type="date" id="tanggalFoto" onchange="calculateAutoAge()" required>
+                        <span id="calculatedAge" class="auto-age-preview"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Lokasi (Opsional):</label>
+                        <input type="text" id="lokasi" placeholder="Contoh: Taman Kota">
+                    </div>
+                    <div class="form-group">
+                        <label>Cerita Kenangan:</label>
+                        <textarea id="cerita" placeholder="Tuliskan cerita lengkap kenangan manis ini..."></textarea>
+                    </div>
+                    <button type="submit" id="btnSubmit" class="btn-submit">📤 Simpan ke Album</button>
+                </form>
+            </div>
+        </div>
+
+        <h3 class="section-title">📸 Galeri Kenangan</h3>
+        <div id="album-list" class="status-msg">Memuat album kenangan... ✨</div>
     </div>
-  </div>
 
-  <!-- JavaScript Logika -->
-  <script>
-    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby4EiH2AxOYaGX3DDpri-3Fhw_VG8LW54Kz9b7PHJQOxNGr4mheifOE7dO8ECytzRkybw/exec';
-    const ADMIN_PASSWORD = "azka23";
+    <input type="file" id="additionalPhotoInput" accept="image/*" multiple style="display:none" onchange="handleAdditionalPhotos(this)">
 
-    let memoriesData = [];
-    let isAdmin = false;
-    let currentSlideIndex = 0;
-    let currentPhotoList = [];
-    let activeMemoryId = null;
+    <div id="imageModal" class="image-modal">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <button class="modal-nav-btn modal-nav-prev" id="btnPrev" onclick="prevImage(event)">❮</button>
+        <img class="modal-content" id="modalImg">
+        <button class="modal-nav-btn modal-nav-next" id="btnNext" onclick="nextImage(event)">❯</button>
+        <div class="modal-counter" id="modalCounter"></div>
+    </div>
 
-    // Turn Google Drive link to Direct View Image Link
-    function getDirectImgUrl(driveUrlOrId) {
-      if(!driveUrlOrId) return 'https://via.placeholder.com/400x300?text=No+Image';
-      let id = driveUrlOrId;
-      if(driveUrlOrId.includes('id=')){
-        id = driveUrlOrId.split('id=')[1].split('&')[0];
-      } else if(driveUrlOrId.includes('/d/')){
-        id = driveUrlOrId.split('/d/')[1].split('/')[0];
-      }
-      return `https://lh3.googleusercontent.com/d/${id}`;
-    }
+    <script>
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby4EiH2AxOYaGX3DDpri-3Fhw_VG8LW54Kz9b7PHJQOxNGr4mheifOE7dO8ECytzRkybw/exec';
+        const ADMIN_PASSWORD = "azka23";
 
-    // Load CSV Data
-    async function fetchMemories() {
-      try {
-        const res = await fetch(SHEET_CSV_URL + '&timestamp=' + new Date().getTime());
-        const text = await res.text();
-        memoriesData = parseCSV(text);
-        renderCards();
-      } catch (err) {
-        console.error(err);
-        document.getElementById('loading').innerHTML = '<p class="text-red-400">Gagal memuat data kenangan.</p>';
-      }
-    }
+        let calculatedUsiaText = "";
+        let targetCardIdForAdd = null;
 
-    function parseCSV(text) {
-      const lines = text.split('\n').filter(l => l.trim() !== '');
-      const results = [];
-      for (let i = 1; i < lines.length; i++) {
-        const matches = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-        if (matches) {
-          const row = matches.map(val => val.replace(/^"|"$/g, '').replace(/""/g, '"'));
-          results.push({
-            id: row[0] || '',
-            tanggal: row[1] || '',
-            judul: row[2] || '',
-            cerita: row[3] || '',
-            lokasi: row[4] || '',
-            usia: row[5] || '',
-            fileUrl: row[6] || '',
-            fileIds: row[7] ? row[7].split(',') : [row[6]]
-          });
-        }
-      }
-      return results.reverse();
-    }
+        let currentImageGroup = [];
+        let currentImageIndex = 0;
 
-    function renderCards() {
-      document.getElementById('loading').classList.add('hidden');
-      const grid = document.getElementById('cardsGrid');
-      grid.innerHTML = '';
+        let childrenData = JSON.parse(localStorage.getItem('children_data')) || [
+            { id: '1', name: 'Si Kecil', parents: '', dob: '' }
+        ];
+        let activeChildId = localStorage.getItem('active_child_id') || childrenData[0].id;
 
-      if (memoriesData.length === 0) {
-        grid.innerHTML = '<p class="col-span-full text-center text-slate-500 py-8">Belum ada kenangan tersimpan.</p>';
-        return;
-      }
-
-      memoriesData.forEach(item => {
-        const firstPhotoId = item.fileIds[0] || item.fileUrl;
-        const mainImgUrl = getDirectImgUrl(firstPhotoId);
-        const totalPhotos = item.fileIds.length;
-
-        const card = document.createElement('div');
-        card.className = 'bg-slate-800 border border-slate-700/60 rounded-xl overflow-hidden shadow-lg hover:border-amber-500/50 transition cursor-pointer flex flex-col';
-        card.onclick = () => openModal(item);
-
-        card.innerHTML = `
-          <div class="relative h-48 bg-slate-900 overflow-hidden">
-            <img src="${mainImgUrl}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="${item.judul}">
-            ${totalPhotos > 1 ? `<span class="absolute top-2 right-2 bg-black/70 text-amber-400 text-xs px-2 py-1 rounded-md font-semibold"><i class="fa-solid fa-images"></i> ${totalPhotos} Foto</span>` : ''}
-          </div>
-          <div class="p-4 flex-1 flex flex-col justify-between">
-            <div>
-              <span class="text-xs text-amber-400 font-medium">${item.tanggal}</span>
-              <h3 class="text-base font-semibold text-slate-100 mt-1 line-clamp-1">${item.judul}</h3>
-              <p class="text-xs text-slate-400 mt-2 line-clamp-2">${item.cerita}</p>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-700/50 flex justify-between text-xs text-slate-500">
-              <span><i class="fa-solid fa-location-dot"></i> ${item.lokasi || '-'}</span>
-              <span><i class="fa-solid fa-user"></i> ${item.usia || '-'}</span>
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    // Modal & Slider Logic
-    function openModal(item) {
-      activeMemoryId = item.id;
-      currentPhotoList = item.fileIds;
-      currentSlideIndex = 0;
-
-      document.getElementById('modalTitle').innerText = item.judul;
-      document.getElementById('modalDate').innerHTML = `<i class="fa-regular fa-calendar"></i> ${item.tanggal}`;
-      document.getElementById('modalLocation').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${item.lokasi || '-'}`;
-      document.getElementById('modalAge').innerHTML = `<i class="fa-solid fa-user"></i> ${item.usia || '-'}`;
-      document.getElementById('modalStory').innerText = item.cerita;
-
-      buildSlider();
-
-      // Show Admin Extras if logged in
-      if (isAdmin) {
-        document.getElementById('addPhotoContainer').classList.remove('hidden');
-        document.getElementById('modalAdminActions').classList.remove('hidden');
-      } else {
-        document.getElementById('addPhotoContainer').classList.add('hidden');
-        document.getElementById('modalAdminActions').classList.add('hidden');
-      }
-
-      document.getElementById('detailModal').classList.remove('hidden');
-    }
-
-    function buildSlider() {
-      const track = document.getElementById('sliderTrack');
-      const dots = document.getElementById('slideDots');
-      track.innerHTML = '';
-      dots.innerHTML = '';
-
-      currentPhotoList.forEach((photoId, idx) => {
-        const img = document.createElement('img');
-        img.src = getDirectImgUrl(photoId);
-        img.className = 'slide-img';
-        track.appendChild(img);
-
-        const dot = document.createElement('button');
-        dot.className = `w-2.5 h-2.5 rounded-full transition ${idx === 0 ? 'bg-amber-400' : 'bg-slate-600'}`;
-        dot.onclick = () => goToSlide(idx);
-        dots.appendChild(dot);
-      });
-
-      // Toggle Nav Buttons
-      if (currentPhotoList.length > 1) {
-        document.getElementById('prevBtn').classList.remove('hidden');
-        document.getElementById('nextBtn').classList.remove('hidden');
-        document.getElementById('slideDots').classList.remove('hidden');
-      } else {
-        document.getElementById('prevBtn').classList.add('hidden');
-        document.getElementById('nextBtn').classList.add('hidden');
-        document.getElementById('slideDots').classList.add('hidden');
-      }
-
-      updateSlidePosition();
-    }
-
-    function moveSlide(direction) {
-      currentSlideIndex += direction;
-      if (currentSlideIndex < 0) currentSlideIndex = currentPhotoList.length - 1;
-      if (currentSlideIndex >= currentPhotoList.length) currentSlideIndex = 0;
-      updateSlidePosition();
-    }
-
-    function goToSlide(index) {
-      currentSlideIndex = index;
-      updateSlidePosition();
-    }
-
-    function updateSlidePosition() {
-      const track = document.getElementById('sliderTrack');
-      track.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
-
-      // Update dots style
-      const dots = document.getElementById('slideDots').children;
-      for (let i = 0; i < dots.length; i++) {
-        if (i === currentSlideIndex) {
-          dots[i].className = 'w-2.5 h-2.5 rounded-full transition bg-amber-400 scale-125';
-        } else {
-          dots[i].className = 'w-2.5 h-2.5 rounded-full transition bg-slate-600';
-        }
-      }
-    }
-
-    function closeModal() {
-      document.getElementById('detailModal').classList.add('hidden');
-    }
-
-    // Toggle Admin
-    function toggleAdminMode() {
-      if (isAdmin) {
-        isAdmin = false;
-        document.getElementById('adminBtnText').innerText = "Mode Admin";
-        document.getElementById('adminPanel').classList.add('hidden');
-      } else {
-        const pwd = prompt("Masukkan Password Admin:");
-        if (pwd === ADMIN_PASSWORD) {
-          isAdmin = true;
-          document.getElementById('adminBtnText').innerText = "Keluar Admin";
-          document.getElementById('adminPanel').classList.remove('hidden');
-        } else if (pwd !== null) {
-          alert("Password Salah!");
-        }
-      }
-    }
-
-    // Form Submit (Simpan Kenangan Baru)
-    async function handleFormSubmit(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btnSubmit');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah...';
-
-      const fileInput = document.getElementById('inputFile').files[0];
-      const reader = new FileReader();
-
-      reader.onload = async function() {
-        const base64Data = reader.result.split(',')[1];
-        const payload = {
-          action: 'saveData',
-          judul: document.getElementById('inputJudul').value,
-          tanggal: document.getElementById('inputTanggal').value,
-          lokasi: document.getElementById('inputLokasi').value,
-          usia: document.getElementById('inputUsia').value,
-          cerita: document.getElementById('inputCerita').value,
-          fileName: fileInput.name,
-          mimeType: fileInput.type,
-          fileData: base64Data
+        window.onload = function() {
+            renderChildDropdowns();
+            loadCurrentChildProfile();
+            if (localStorage.getItem('is_admin_logged_in') === 'true') {
+                showAdminUI(true);
+            }
+            loadAlbum();
         };
 
-        try {
-          await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          alert("Berhasil disimpan! Memperbarui data...");
-          document.getElementById('uploadForm').reset();
-          setTimeout(fetchMemories, 3000);
-        } catch (err) {
-          alert("Terjadi kesalahan saat mengunggah.");
-        } finally {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan Kenangan';
+        function openModalGroup(fileIdsStr, startIndex) {
+            const ids = fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
+            currentImageGroup = ids.map(id => {
+                if (id.includes('http')) return id;
+                return `https://lh3.googleusercontent.com/d/${id}`;
+            });
+            currentImageIndex = startIndex;
+            updateModalView();
+            document.getElementById('imageModal').style.display = 'flex';
         }
-      };
 
-      reader.readAsDataURL(fileInput);
-    }
+        function updateModalView() {
+            const img = document.getElementById('modalImg');
+            img.src = currentImageGroup[currentImageIndex];
+            const prevBtn = document.getElementById('btnPrev');
+            const nextBtn = document.getElementById('btnNext');
+            const counter = document.getElementById('modalCounter');
 
-    // Tambah Foto Tambahan (Admin Only)
-    async function uploadAdditionalPhoto() {
-      const fileInput = document.getElementById('addPhotoInput').files[0];
-      if (!fileInput) return alert("Pilih foto terlebih dahulu!");
-
-      const reader = new FileReader();
-      reader.onload = async function() {
-        const base64Data = reader.result.split(',')[1];
-        const payload = {
-          action: 'addPhoto',
-          id: activeMemoryId,
-          fileName: fileInput.name,
-          mimeType: fileInput.type,
-          fileData: base64Data
-        };
-
-        try {
-          await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          alert("Foto berhasil ditambahkan! Memperbarui...");
-          closeModal();
-          setTimeout(fetchMemories, 3000);
-        } catch (err) {
-          alert("Gagal menambahkan foto.");
+            if (currentImageGroup.length > 1) {
+                prevBtn.style.display = 'block';
+                nextBtn.style.display = 'block';
+                counter.style.display = 'block';
+                counter.innerText = `${currentImageIndex + 1} / ${currentImageGroup.length}`;
+            } else {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                counter.style.display = 'none';
+            }
         }
-      };
 
-      reader.readAsDataURL(fileInput);
-    }
+        function prevImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex > 0) ? currentImageIndex - 1 : currentImageGroup.length - 1; updateModalView(); }
+        function nextImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex < currentImageGroup.length - 1) ? currentImageIndex + 1 : 0; updateModalView(); }
+        function closeModal() { document.getElementById('imageModal').style.display = 'none'; }
 
-    // Hapus Momen (Admin Only)
-    async function deleteCurrentItem() {
-      if (!confirm("Apakah Anda yakin ingin menghapus kenangan ini?")) return;
+        function renderChildDropdowns() {
+            const frontSelect = document.getElementById('selectChildFront');
+            const adminSelect = document.getElementById('selectChildAdmin');
+            frontSelect.innerHTML = ''; adminSelect.innerHTML = '';
 
-      try {
-        await fetch(WEB_APP_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'delete', id: activeMemoryId })
-        });
+            childrenData.forEach(child => {
+                const opt1 = document.createElement('option'); opt1.value = child.id; opt1.innerText = child.name || 'Si Kecil';
+                if (child.id === activeChildId) opt1.selected = true;
+                frontSelect.appendChild(opt1);
 
-        alert("Kenangan dihapus! Memperbarui...");
-        closeModal();
-        setTimeout(fetchMemories, 3000);
-      } catch (err) {
-        alert("Gagal menghapus.");
-      }
-    }
+                const opt2 = document.createElement('option'); opt2.value = child.id; opt2.innerText = child.name || 'Si Kecil';
+                if (child.id === activeChildId) opt2.selected = true;
+                adminSelect.appendChild(opt2);
+            });
+        }
 
-    // Initial Load
-    fetchMemories();
-  </script>
+        function addNewChild() {
+            const name = prompt("Masukkan nama anak baru:");
+            if (!name) return;
+            const newChild = { id: Date.now().toString(), name: name, parents: '', dob: '' };
+            childrenData.push(newChild);
+            activeChildId = newChild.id;
+            saveAllChildrenData();
+            renderChildDropdowns();
+            loadCurrentChildProfile();
+        }
+
+        function changeActiveChild(id) {
+            activeChildId = id;
+            localStorage.setItem('active_child_id', activeChildId);
+            renderChildDropdowns();
+            loadCurrentChildProfile();
+        }
+
+        function loadCurrentChildProfile() {
+            const child = childrenData.find(c => c.id === activeChildId) || childrenData[0];
+            document.getElementById('childName').value = child.name || '';
+            document.getElementById('childParents').value = child.parents || '';
+            document.getElementById('dob').value = child.dob || '';
+            document.getElementById('childNameDisplay').innerText = child.name ? `👶 ${child.name}` : "👶 Si Kecil";
+            document.getElementById('childParentsDisplay').innerText = child.parents ? `Putra/Putri dari: ${child.parents}` : "Buah hati tercinta";
+            calculateAutoAge();
+        }
+
+        function saveCurrentChildProfile() {
+            const childIndex = childrenData.findIndex(c => c.id === activeChildId);
+            if (childIndex !== -1) {
+                childrenData[childIndex].name = document.getElementById('childName').value;
+                childrenData[childIndex].parents = document.getElementById('childParents').value;
+                childrenData[childIndex].dob = document.getElementById('dob').value;
+                saveAllChildrenData();
+                renderChildDropdowns();
+                loadCurrentChildProfile();
+            }
+        }
+
+        function saveAllChildrenData() {
+            localStorage.setItem('children_data', JSON.stringify(childrenData));
+        }
+
+        function toggleAdminMode() {
+            const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
+            if (isAdmin) {
+                localStorage.setItem('is_admin_logged_in', 'false');
+                showAdminUI(false);
+            } else {
+                const pass = prompt("Masukkan Password Admin:");
+                if (pass === ADMIN_PASSWORD) {
+                    localStorage.setItem('is_admin_logged_in', 'true');
+                    showAdminUI(true);
+                } else if (pass !== null) {
+                    alert("Password Salah!");
+                }
+            }
+        }
+
+        function showAdminUI(show) {
+            document.getElementById('adminPanel').style.display = show ? 'block' : 'none';
+            document.getElementById('adminBtn').innerText = show ? '🔓 Keluar Admin' : '🔒 Admin';
+            const actionBoxes = document.querySelectorAll('.admin-action-box');
+            actionBoxes.forEach(box => box.style.display = show ? 'block' : 'none');
+        }
+
+        function detectPhotoDate(input) {
+            const file = input.files[0];
+            const notice = document.getElementById('exifNotice');
+            if (!file) return;
+
+            EXIF.getData(file, function() {
+                const exifDate = EXIF.getTag(this, "DateTimeOriginal");
+                if (exifDate) {
+                    const parts = exifDate.split(" ");
+                    const dateParts = parts[0].split(":");
+                    const formattedDate = `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}`;
+                    document.getElementById('tanggalFoto').value = formattedDate;
+                    notice.innerText = "✨ Tanggal foto terdeteksi otomatis dari EXIF!";
+                    calculateAutoAge();
+                } else {
+                    notice.innerText = "";
+                }
+            });
+        }
+
+        function calculateAutoAge() {
+            const dobVal = document.getElementById('dob').value;
+            const photoDateVal = document.getElementById('tanggalFoto').value;
+            const output = document.getElementById('calculatedAge');
+
+            if (!dobVal || !photoDateVal) {
+                output.innerText = "";
+                calculatedUsiaText = "";
+                return;
+            }
+
+            const birth = new Date(dobVal);
+            const photo = new Date(photoDateVal);
+
+            let years = photo.getFullYear() - birth.getFullYear();
+            let months = photo.getMonth() - birth.getMonth();
+            let days = photo.getDate() - birth.getDate();
+
+            if (days < 0) {
+                months--;
+                const prevMonth = new Date(photo.getFullYear(), photo.getMonth(), 0);
+                days += prevMonth.getDate();
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            let result = "Usia saat foto: ";
+            if (years > 0) result += `${years} Tahun `;
+            if (months > 0) result += `${months} Bulan `;
+            if (days > 0 || (years === 0 && months === 0)) result += `${days} Hari`;
+
+            output.innerText = result;
+            calculatedUsiaText = result.replace("Usia saat foto: ", "");
+        }
+
+        async function loadAlbum() {
+            const container = document.getElementById('album-list');
+            container.className = 'status-msg';
+            container.innerText = "Memuat album kenangan... ✨";
+
+            try {
+                const response = await fetch(SHEET_CSV_URL + '&t=' + new Date().getTime());
+                const csvText = await response.text();
+                const rows = parseCSV(csvText);
+
+                if (rows.length <= 1) {
+                    container.innerText = "Belum ada kenangan. Yuk tambah kenangan pertama! ✨";
+                    return;
+                }
+
+                container.className = "";
+                container.innerHTML = "";
+
+                const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
+
+                // Skip header (i=1)
+                for (let i = rows.length - 1; i >= 1; i--) {
+                    const row = rows[i];
+                    if (!row || row.length < 3) continue;
+
+                    const id = row[0];
+                    const tanggal = row[1];
+                    const judul = row[2];
+                    const cerita = row[3];
+                    const lokasi = row[4];
+                    const usia = row[5];
+                    const fileUrl = row[6];
+                    const fileIdsStr = row[7] || row[6];
+
+                    const ids = fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
+
+                    let galleryHtml = "";
+                    if (ids.length === 1) {
+                        const imgUrl = ids[0].includes('http') ? ids[0] : `https://lh3.googleusercontent.com/d/${ids[0]}`;
+                        galleryHtml = `
+                            <div class="card-img-container" onclick="openModalGroup('${fileIdsStr}', 0)">
+                                <img src="${imgUrl}" class="card-img" alt="${judul}">
+                            </div>
+                        `;
+                    } else {
+                        let imgs = "";
+                        ids.forEach((imgId, idx) => {
+                            const imgUrl = imgId.includes('http') ? imgId : `https://lh3.googleusercontent.com/d/${imgId}`;
+                            imgs += `
+                                <div class="card-img-container" onclick="openModalGroup('${fileIdsStr}', ${idx})">
+                                    <img src="${imgUrl}" class="card-img" alt="${judul}">
+                                </div>
+                            `;
+                        });
+                        galleryHtml = `<div class="photo-gallery-grid">${imgs}</div>`;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = `card ${ids.length === 1 ? 'single-photo' : ''}`;
+                    card.innerHTML = `
+                        ${galleryHtml}
+                        <div class="card-body">
+                            <div class="meta-info">
+                                <span>📅 ${tanggal}</span>
+                                ${usia ? `<span>• 👶 ${usia}</span>` : ''}
+                            </div>
+                            <h3 class="card-title">${judul}</h3>
+                            <p class="card-story">${cerita}</p>
+                            <div class="card-footer">
+                                <span class="location-tag">${lokasi ? `📍 ${lokasi}` : ''}</span>
+                            </div>
+                            <div class="admin-action-box" style="display: ${isAdmin ? 'block' : 'none'};">
+                                <button class="admin-sub-btn" onclick="triggerAddPhotos('${id}')">➕ Tambah Foto ke Momen Ini</button>
+                                <button class="admin-delete-btn" onclick="deleteMemory('${id}')">🗑️ Hapus Kenangan Ini</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerText = "Gagal memuat album. Pastikan koneksi internet bagus! ❌";
+            }
+        }
+
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(l => l.trim() !== '');
+            const results = [];
+            for (let i = 0; i < lines.length; i++) {
+                const matches = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                if (matches) {
+                    const row = matches.map(val => val.replace(/^"|"$/g, '').replace(/""/g, '"'));
+                    results.push(row);
+                }
+            }
+            return results;
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            const fileInput = document.getElementById('fotoFile');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Pilih minimal satu foto!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "📤 Mengunggah Foto...";
+
+            try {
+                const file = fileInput.files[0];
+                const base64Data = await convertFileToBase64(file);
+
+                const payload = {
+                    action: 'saveData',
+                    judul: document.getElementById('judul').value,
+                    tanggal: document.getElementById('tanggalFoto').value,
+                    lokasi: document.getElementById('lokasi').value,
+                    usia: calculatedUsiaText,
+                    cerita: document.getElementById('cerita').value,
+                    fileName: file.name,
+                    mimeType: file.type,
+                    fileData: base64Data
+                };
+
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                alert("Kenangan berhasil disimpan! ✨");
+                document.getElementById('uploadForm').reset();
+                document.getElementById('calculatedAge').innerText = "";
+                document.getElementById('exifNotice').innerText = "";
+                setTimeout(loadAlbum, 3000);
+
+            } catch (err) {
+                alert("Gagal mengunggah kenangan.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "📤 Simpan ke Album";
+            }
+        }
+
+        function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function triggerAddPhotos(id) {
+            targetCardIdForAdd = id;
+            document.getElementById('additionalPhotoInput').click();
+        }
+
+        async function handleAdditionalPhotos(input) {
+            if (!input.files || input.files.length === 0 || !targetCardIdForAdd) return;
+
+            const file = input.files[0];
+            const base64Data = await convertFileToBase64(file);
+
+            const payload = {
+                action: 'addPhoto',
+                id: targetCardIdForAdd,
+                fileName: file.name,
+                mimeType: file.type,
+                fileData: base64Data
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                alert("Foto tambahan berhasil diunggah! ✨");
+                setTimeout(loadAlbum, 3000);
+            } catch (err) {
+                alert("Gagal mengunggah foto tambahan.");
+            }
+        }
+
+        async function deleteMemory(id) {
+            if (!confirm("Yakin ingin menghapus kenangan ini?")) return;
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', id: id })
+                });
+
+                alert("Kenangan berhasil dihapus! ✨");
+                setTimeout(loadAlbum, 3000);
+            } catch (err) {
+                alert("Gagal menghapus.");
+            }
+        }
+    </script>
 </body>
 </html>
