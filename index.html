@@ -575,7 +575,7 @@
             calculatedUsiaText = result.replace("Usia saat foto: ", "");
         }
 
-        // FUNGSI MEMUAT & MENGURUTKAN KRONOLOGIS
+        // FUNGSI MEMUAT & MENGURUTKAN KRONOLOGIS (TANGGAL TERBARU DI ATAS)
         async function loadAlbum() {
             const container = document.getElementById('album-list');
             container.className = 'status-msg';
@@ -602,15 +602,19 @@
 
                     if (!id || !judul) continue;
 
-                    // Mengurai Tanggal untuk Urutan Kronologis Akurat
+                    // Konversi Tanggal Foto ke Timestamp untuk Pengurutan Presisi
                     let timeVal = 0;
                     if (tanggal) {
-                        const parsedDate = new Date(tanggal);
-                        if (!isNaN(parsedDate.getTime())) {
-                            timeVal = parsedDate.getTime();
-                        } else {
-                            timeVal = new Date(tanggal.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$2-$1")).getTime() || 0;
+                        let dateObj = new Date(tanggal);
+                        if (isNaN(dateObj.getTime())) {
+                            const parts = tanggal.split(/[-/]/);
+                            if (parts.length === 3) {
+                                if (parts[0].length === 2 && parts[2].length === 4) {
+                                    dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                                }
+                            }
                         }
+                        timeVal = !isNaN(dateObj.getTime()) ? dateObj.getTime() : 0;
                     }
 
                     items.push({
@@ -626,7 +630,7 @@
                     });
                 }
 
-                // URUTKAN: TERBARU DI ATAS, TERLAMA DI BAWAH
+                // URUTKAN: TANGGAL TERBARU (UMUR PALING BESAR) DI PALING ATAS
                 items.sort((a, b) => b.dateTime - a.dateTime);
 
                 if (items.length === 0) {
