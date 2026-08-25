@@ -225,6 +225,22 @@
         .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #edf2f7; padding-top: 15px; }
         .location-tag { font-size: 0.85em; color: var(--text-muted); font-weight: 500; }
         
+        /* Tombol Download di Kartu Kenangan */
+        .btn-download-card {
+            background: #f0fff4;
+            color: #276749;
+            border: 1px solid #c6f6d5;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-download-card:hover { background: #dcffe4; }
+
         .admin-action-box { display: none; margin-top: 15px; border-top: 1px dashed #cbd5e0; padding-top: 15px; }
 
         .admin-sub-btn {
@@ -246,7 +262,7 @@
             width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.92);
             backdrop-filter: blur(8px); align-items: center; justify-content: center;
         }
-        .modal-content { max-width: 95%; max-height: 85vh; object-fit: contain; border-radius: 12px; }
+        .modal-content { max-width: 95%; max-height: 80vh; object-fit: contain; border-radius: 12px; }
         .modal-close { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; z-index: 10001; }
         .modal-nav-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
@@ -255,7 +271,17 @@
         }
         .modal-nav-prev { left: 15px; }
         .modal-nav-next { right: 15px; }
-        .modal-counter { position: absolute; bottom: 20px; color: white; font-size: 0.9em; font-weight: 600; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; }
+        
+        .modal-bottom-bar {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 12px; z-index: 10000;
+        }
+        .modal-counter { color: white; font-size: 0.85em; font-weight: 600; background: rgba(0,0,0,0.6); padding: 6px 14px; border-radius: 20px; }
+        .btn-download-modal {
+            background: var(--primary); color: white; border: none; padding: 6px 16px;
+            border-radius: 20px; font-size: 0.85em; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
@@ -335,7 +361,11 @@
         <button class="modal-nav-btn modal-nav-prev" id="btnPrev" onclick="prevImage(event)">❮</button>
         <img class="modal-content" id="modalImg" alt="Foto Kenangan">
         <button class="modal-nav-btn modal-nav-next" id="btnNext" onclick="nextImage(event)">❯</button>
-        <div class="modal-counter" id="modalCounter"></div>
+        
+        <div class="modal-bottom-bar">
+            <div class="modal-counter" id="modalCounter"></div>
+            <button class="btn-download-modal" onclick="downloadActiveModalPhoto(this)">⬇️ Download Foto</button>
+        </div>
     </div>
 
     <script>
@@ -463,16 +493,22 @@
 
             let years = taken.getFullYear() - birth.getFullYear();
             let months = taken.getMonth() - birth.getMonth();
-            let days = taken.getDate() - birth.getDate();
+            let days = CustomDateDiff(birth, taken);
 
-            if (days < 0) {
-                months--;
-                const lastMonth = new Date(taken.getFullYear(), taken.getMonth(), 0);
-                days += lastMonth.getDate();
-            }
-            if (months < 0) {
-                years--;
-                months += 12;
+            function CustomDateDiff(b, t) {
+                let y = t.getFullYear() - b.getFullYear();
+                let m = t.getMonth() - b.getMonth();
+                let d = t.getDate() - b.getDate();
+                if (d < 0) {
+                    m--;
+                    const lastMonth = new Date(t.getFullYear(), t.getMonth(), 0);
+                    d += lastMonth.getDate();
+                }
+                if (m < 0) {
+                    y--;
+                    m += 12;
+                }
+                return d;
             }
 
             let ageStr = "";
@@ -518,10 +554,9 @@
                         return;
                     }
 
-                    // Ambil baris data tanpa baris header
                     let dataRows = rows.slice(1);
 
-                    // PENGURUTAN: Urutkan tanggal momen dari TERBARU (atas) ke TERLAMA (bawah)
+                    // Sorting: Momen terbaru di paling atas
                     dataRows.sort((a, b) => {
                         const dateA = new Date(a[1] || 0);
                         const dateB = new Date(b[1] || 0);
@@ -563,6 +598,9 @@
                             photoGridHtml = `<div class="photo-gallery-grid">${imgs}</div>`;
                         }
 
+                        // Menentukan URL foto pertama untuk tombol download cepat di kartu
+                        const mainPhotoUrl = photoList[0] ? (photoList[0].includes('http') ? photoList[0] : `https://lh3.googleusercontent.com/d/${photoList[0]}`) : '';
+
                         card.innerHTML = `
                             ${photoGridHtml}
                             <div class="card-body">
@@ -574,6 +612,7 @@
                                 <p class="card-story">${cerita || ''}</p>
                                 <div class="card-footer">
                                     <span class="location-tag">${lokasi ? `📍 ${lokasi}` : ''}</span>
+                                    ${mainPhotoUrl ? `<button class="btn-download-card" onclick="downloadImage('${mainPhotoUrl}', '${judul || 'momen'}', this)">⬇️ Download Foto</button>` : ''}
                                 </div>
                                 <div class="admin-action-box" style="display: ${isAdminLoggedIn ? 'block' : 'none'};">
                                     <button class="admin-sub-btn" onclick="triggerAddPhotos('${id}')">➕ Tambah Foto ke Momen Ini</button>
@@ -589,6 +628,46 @@
                     albumContainer.className = "status-msg";
                     albumContainer.innerHTML = 'Gagal memuat kenangan. Pastikan koneksi internet stabil.';
                 });
+        }
+
+        // FUNGSI UNTUK MENGUNDUH FOTO OTOmATIS
+        async function downloadImage(imageSrc, filenameText, btnElement) {
+            const originalText = btnElement ? btnElement.innerHTML : '';
+            if (btnElement) {
+                btnElement.innerText = "⏳ Mengunduh...";
+                btnElement.disabled = true;
+            }
+
+            try {
+                const response = await fetch(imageSrc);
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = `${filenameText.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+            } catch (err) {
+                console.error("Gagal mengunduh gambar via Fetch:", err);
+                // Fallback jika terjadi CORS issue saat mengunduh
+                window.open(imageSrc, '_blank');
+            } finally {
+                if (btnElement) {
+                    btnElement.innerHTML = originalText;
+                    btnElement.disabled = false;
+                }
+            }
+        }
+
+        function downloadActiveModalPhoto(btnElement) {
+            if (currentImageGroup.length > 0) {
+                const activeUrl = currentImageGroup[currentImageIndex];
+                downloadImage(activeUrl, "momen_kenangan", btnElement);
+            }
         }
 
         function deleteAlbumCard(idCard, elementBtn) {
