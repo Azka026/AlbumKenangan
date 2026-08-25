@@ -333,13 +333,13 @@
     <div id="imageModal" class="image-modal">
         <span class="modal-close" onclick="closeModalDirect()">&times;</span>
         <button class="modal-nav-btn modal-nav-prev" id="btnPrev" onclick="prevImage(event)">❮</button>
-        <img class="modal-content" id="modalImg">
+        <img class="modal-content" id="modalImg" alt="Foto Kenangan">
         <button class="modal-nav-btn modal-nav-next" id="btnNext" onclick="nextImage(event)">❯</button>
         <div class="modal-counter" id="modalCounter"></div>
     </div>
 
     <script>
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
+        const SHEET_BASE_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby51SO8RU6-9liD7jEfL3Af0-IwNZJELY6yD5H7YCzwEANZIF8gFYQ_gJVJ53oOlwEM/exec';
         const ADMIN_PASSWORD = "azka23";
 
@@ -348,6 +348,7 @@
         let currentImageGroup = [];
         let currentImageIndex = 0;
         let isModalOpen = false;
+        let isAdminLoggedIn = false;
 
         let childrenData = JSON.parse(localStorage.getItem('children_data')) || [
             { id: '1', name: 'Si Kecil', parents: '', dob: '' }
@@ -366,35 +367,31 @@
         window.onpopstate = function() { if (isModalOpen) closeModalUI(); };
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && isModalOpen) closeModalDirect(); });
 
-        function openModalGroup(fileIdsStr, startIndex) {
-            const ids = fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
-            currentImageGroup = ids.map(id => id.includes('http') ? id : `https://lh3.googleusercontent.com/d/${id}`);
-            currentImageIndex = startIndex;
-            updateModalView();
-            document.getElementById('imageModal').style.display = 'flex';
-            if (!isModalOpen) { isModalOpen = true; history.pushState({ modalOpen: true }, ""); }
-        }
-
-        function closeModalDirect() { if (isModalOpen) history.back(); }
-        function closeModalUI() { document.getElementById('imageModal').style.display = 'none'; isModalOpen = false; }
-
-        function updateModalView() {
-            const img = document.getElementById('modalImg');
-            img.src = currentImageGroup[currentImageIndex];
-            const prevBtn = document.getElementById('btnPrev');
-            const nextBtn = document.getElementById('btnNext');
-            const counter = document.getElementById('modalCounter');
-
-            if (currentImageGroup.length > 1) {
-                prevBtn.style.display = 'block'; nextBtn.style.display = 'block'; counter.style.display = 'block';
-                counter.innerText = `${currentImageIndex + 1} / ${currentImageGroup.length}`;
+        function toggleAdminMode() {
+            if (isAdminLoggedIn) {
+                showAdminUI(false);
+                localStorage.setItem('is_admin_logged_in', 'false');
+                alert("Mode Admin ditutup.");
             } else {
-                prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; counter.style.display = 'none';
+                const pass = prompt("Masukkan password Admin:");
+                if (pass === ADMIN_PASSWORD) {
+                    showAdminUI(true);
+                    localStorage.setItem('is_admin_logged_in', 'true');
+                    alert("Berhasil masuk sebagai Admin!");
+                } else if (pass !== null) {
+                    alert("Password salah!");
+                }
             }
         }
 
-        function prevImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex > 0) ? currentImageIndex - 1 : currentImageGroup.length - 1; updateModalView(); }
-        function nextImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex < currentImageGroup.length - 1) ? currentImageIndex + 1 : 0; updateModalView(); }
+        function showAdminUI(enable) {
+            isAdminLoggedIn = enable;
+            document.getElementById('adminPanel').style.display = enable ? 'block' : 'none';
+            document.getElementById('adminBtn').innerText = enable ? '🔓 Keluar Admin' : '🔒 Admin';
+            
+            const actionBoxes = document.querySelectorAll('.admin-action-box');
+            actionBoxes.forEach(box => box.style.display = enable ? 'block' : 'none');
+        }
 
         function renderChildDropdowns() {
             const frontSelect = document.getElementById('selectChildFront');
@@ -430,6 +427,10 @@
             loadCurrentChildProfile();
         }
 
+        function saveAllChildrenData() {
+            localStorage.setItem('children_data', JSON.stringify(childrenData));
+        }
+
         function loadCurrentChildProfile() {
             const child = childrenData.find(c => c.id === activeChildId) || childrenData[0];
             document.getElementById('childName').value = child.name || '';
@@ -447,298 +448,360 @@
                 childrenData[childIndex].parents = document.getElementById('childParents').value;
                 childrenData[childIndex].dob = document.getElementById('dob').value;
                 saveAllChildrenData();
-                renderChildDropdowns();
                 loadCurrentChildProfile();
             }
         }
 
-        function saveAllChildrenData() { localStorage.setItem('children_data', JSON.stringify(childrenData)); }
+        function calculateAutoAge() {
+            const dobVal = document.getElementById('dob').value;
+            const fotoVal = document.getElementById('tanggalFoto').value;
+            const preview = document.getElementById('calculatedAge');
 
-        function toggleAdminMode() {
-            const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
-            if (isAdmin) {
-                localStorage.setItem('is_admin_logged_in', 'false');
-                showAdminUI(false);
-            } else {
-                const pass = prompt("Masukkan Password Admin:");
-                if (pass === ADMIN_PASSWORD) {
-                    localStorage.setItem('is_admin_logged_in', 'true');
-                    showAdminUI(true);
-                } else if (pass !== null) alert("Password Salah!");
+            if (!dobVal || !fotoVal) {
+                preview.innerText = "";
+                calculatedUsiaText = "";
+                return;
             }
-        }
 
-        function showAdminUI(show) {
-            document.getElementById('adminPanel').style.display = show ? 'block' : 'none';
-            document.getElementById('adminBtn').innerText = show ? '🔓 Keluar Admin' : '🔒 Admin';
-            document.querySelectorAll('.admin-action-box').forEach(box => box.style.display = show ? 'block' : 'none');
+            const birth = new Date(dobVal);
+            const taken = new Date(fotoVal);
+
+            if (taken < birth) {
+                preview.innerText = "Tanggal foto sebelum tanggal lahir!";
+                calculatedUsiaText = "";
+                return;
+            }
+
+            let years = taken.getFullYear() - birth.getFullYear();
+            let months = taken.getMonth() - birth.getMonth();
+            let days = taken.getDate() - birth.getDate();
+
+            if (days < 0) {
+                months--;
+                const lastMonth = new Date(taken.getFullYear(), taken.getMonth(), 0);
+                days += lastMonth.getDate();
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            let ageStr = "";
+            if (years > 0) ageStr += `${years} Tahun `;
+            if (months > 0) ageStr += `${months} Bulan `;
+            if (days >= 0) ageStr += `${days} Hari`;
+
+            calculatedUsiaText = ageStr.trim();
+            preview.innerText = `Usia saat momen: ${calculatedUsiaText}`;
         }
 
         function detectPhotoDate(input) {
-            const file = input.files[0];
             const notice = document.getElementById('exifNotice');
-            if (!file) return;
-
-            EXIF.getData(file, function() {
-                const exifDate = EXIF.getTag(this, "DateTimeOriginal");
-                if (exifDate) {
-                    const parts = exifDate.split(" ");
-                    const dateParts = parts[0].split(":");
-                    document.getElementById('tanggalFoto').value = `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}`;
-                    notice.innerText = "✨ Tanggal foto terdeteksi otomatis!";
-                    calculateAutoAge();
-                } else { notice.innerText = ""; }
-            });
+            notice.innerText = "";
+            if (input.files && input.files[0]) {
+                EXIF.getData(input.files[0], function() {
+                    const exifDate = EXIF.getTag(this, "DateTimeOriginal");
+                    if (exifDate) {
+                        const parts = exifDate.split(" ");
+                        const dateParts = parts[0].split(":");
+                        const formattedDate = `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}`;
+                        document.getElementById('tanggalFoto').value = formattedDate;
+                        notice.innerText = "📅 Tanggal otomatis terdeteksi dari foto!";
+                        calculateAutoAge();
+                    }
+                });
+            }
         }
 
-        function calculateAutoAge() {
-            const dobVal = document.getElementById('dob').value;
-            const photoDateVal = document.getElementById('tanggalFoto').value;
-            const output = document.getElementById('calculatedAge');
+        function loadAlbum() {
+            const albumContainer = document.getElementById('album-list');
+            albumContainer.innerHTML = 'Memuat album kenangan... ✨';
 
-            if (!dobVal || !photoDateVal) { output.innerText = ""; calculatedUsiaText = ""; return; }
+            // Menambahkan timestamp unik (&nocache=) untuk mengabaikan cache Google Sheet
+            const freshUrl = `${SHEET_BASE_URL}&nocache=${new Date().getTime()}`;
 
-            const birth = new Date(dobVal);
-            const photo = new Date(photoDateVal);
-
-            let years = photo.getFullYear() - birth.getFullYear();
-            let months = photo.getMonth() - birth.getMonth();
-            let days = photo.getDate() - birth.getDate();
-
-            if (days < 0) { months--; days += new Date(photo.getFullYear(), photo.getMonth(), 0).getDate(); }
-            if (months < 0) { years--; months += 12; }
-
-            let result = "Usia saat foto: ";
-            if (years > 0) result += `${years} Tahun `;
-            if (months > 0) result += `${months} Bulan `;
-            if (days > 0 || (years === 0 && months === 0)) result += `${days} Hari`;
-
-            output.innerText = result;
-            calculatedUsiaText = result.replace("Usia saat foto: ", "");
-        }
-
-        function parseIndonesianDate(dateStr) {
-            if (!dateStr) return 0;
-            let d = new Date(dateStr.trim());
-            if (!isNaN(d.getTime())) return d.getTime();
-            return 0;
-        }
-
-        async function loadAlbum() {
-            const container = document.getElementById('album-list');
-            container.className = 'status-msg';
-            container.innerText = "Memuat album kenangan... ✨";
-
-            try {
-                // Parameter anti-cache ganda agar browser dan Google Sheets selalu merespons data terbaru
-                const antiCacheUrl = SHEET_CSV_URL + '&t=' + new Date().getTime() + '&nocache=' + Math.random();
-                const response = await fetch(antiCacheUrl);
-                const csvText = await response.text();
-                const rows = parseCSV(csvText);
-
-                if (rows.length <= 1) {
-                    container.innerText = "Belum ada kenangan. Yuk tambah kenangan pertama! ✨";
-                    return;
-                }
-
-                let items = [];
-                for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (!row || row.length < 3) continue;
-
-                    const id = row[0] ? row[0].trim() : "";
-                    const tanggal = row[1] ? row[1].trim() : "";
-                    const judul = row[2] ? row[2].trim() : "";
-                    if (!id || !judul) continue;
-
-                    items.push({
-                        id: id, tanggal: tanggal, judul: judul,
-                        cerita: row[3] || "", lokasi: row[4] || "", usia: row[5] || "",
-                        fileUrl: row[6] || "", fileIdsStr: row[7] || row[6] || "",
-                        dateTime: parseIndonesianDate(tanggal)
-                    });
-                }
-
-                items.sort((a, b) => b.dateTime - a.dateTime);
-
-                if (items.length === 0) {
-                    container.innerText = "Belum ada kenangan. Yuk tambah kenangan pertama! ✨";
-                    return;
-                }
-
-                container.className = "";
-                container.innerHTML = "";
-                const isAdmin = localStorage.getItem('is_admin_logged_in') === 'true';
-
-                items.forEach(item => {
-                    const rawIds = item.fileIdsStr ? item.fileIdsStr.split(',') : [];
-                    const ids = rawIds.map(s => s.trim()).filter(Boolean);
-
-                    let galleryHtml = "";
-                    if (ids.length === 1) {
-                        const imgUrl = ids[0].includes('http') ? ids[0] : `https://lh3.googleusercontent.com/d/${ids[0]}`;
-                        galleryHtml = `<div class="card-img-container" onclick="openModalGroup('${ids.join(',')}', 0)"><img src="${imgUrl}" class="card-img" alt="${item.judul}"></div>`;
-                    } else if (ids.length > 1) {
-                        let imgs = "";
-                        ids.forEach((imgId, idx) => {
-                            const imgUrl = imgId.includes('http') ? imgId : `https://lh3.googleusercontent.com/d/${imgId}`;
-                            imgs += `<div class="card-img-container" onclick="openModalGroup('${ids.join(',')}', ${idx})"><img src="${imgUrl}" class="card-img" alt="${item.judul}"></div>`;
-                        });
-                        galleryHtml = `<div class="photo-gallery-grid">${imgs}</div>`;
+            fetch(freshUrl)
+                .then(response => response.text())
+                .then(csvText => {
+                    const rows = parseCSV(csvText);
+                    if (rows.length <= 1) {
+                        albumContainer.className = "status-msg";
+                        albumContainer.innerHTML = 'Belum ada kenangan tersimpan. Tambahkan momen pertama!';
+                        return;
                     }
 
-                    const card = document.createElement('div');
-                    card.className = `card ${ids.length === 1 ? 'single-photo' : ''}`;
-                    card.innerHTML = `
-                        ${galleryHtml}
-                        <div class="card-body">
-                            <div class="meta-info">
-                                <span>📅 ${item.tanggal}</span>
-                                ${item.usia ? `<span>• 👶 ${item.usia}</span>` : ''}
-                            </div>
-                            <h3 class="card-title">${item.judul}</h3>
-                            <p class="card-story">${item.cerita}</p>
-                            <div class="card-footer">
-                                <span class="location-tag">${item.lokasi ? `📍 ${item.lokasi}` : ''}</span>
-                            </div>
-                            <div class="admin-action-box" style="display: ${isAdmin ? 'block' : 'none'};">
-                                <button class="admin-sub-btn" onclick="triggerAddPhotos('${item.id}')">➕ Tambah Foto ke Momen Ini</button>
-                                <button class="admin-delete-btn" onclick="deleteMemory('${item.id}')">🗑️ Hapus Kenangan Ini</button>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
+                    albumContainer.className = "";
+                    albumContainer.innerHTML = '';
 
-            } catch (err) {
-                console.error(err);
-                container.innerText = "Gagal memuat album. Periksa koneksi internet! ❌";
-            }
+                    // Urutkan momen dari yang terbaru (indeks baris paling bawah)
+                    for (let i = rows.length - 1; i >= 1; i--) {
+                        const [id, tanggal, judul, cerita, lokasi, usia, fileFoto, fileIds] = rows[i];
+                        if (!id) continue;
+
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.setAttribute('data-id', id);
+
+                        const photoList = (fileIds || fileFoto || '').split(',').map(s => s.trim()).filter(Boolean);
+                        let photoGridHtml = '';
+
+                        if (photoList.length === 1) {
+                            card.classList.add('single-photo');
+                            const src = photoList[0].includes('http') ? photoList[0] : `https://lh3.googleusercontent.com/d/${photoList[0]}`;
+                            photoGridHtml = `
+                                <div class="card-img-container" onclick="openModalGroup('${photoList.join(',')}', 0)">
+                                    <img src="${src}" class="card-img" alt="${judul}" loading="lazy">
+                                </div>
+                            `;
+                        } else if (photoList.length > 1) {
+                            let imgs = '';
+                            photoList.forEach((pId, idx) => {
+                                const src = pId.includes('http') ? pId : `https://lh3.googleusercontent.com/d/${pId}`;
+                                imgs += `
+                                    <div class="card-img-container" onclick="openModalGroup('${photoList.join(',')}', ${idx})">
+                                        <img src="${src}" class="card-img" alt="${judul}" loading="lazy">
+                                    </div>
+                                `;
+                            });
+                            photoGridHtml = `<div class="photo-gallery-grid">${imgs}</div>`;
+                        }
+
+                        card.innerHTML = `
+                            ${photoGridHtml}
+                            <div class="card-body">
+                                <div class="meta-info">
+                                    <span>📅 ${tanggal || '-'}</span>
+                                    ${usia ? `<span>🎈 ${usia}</span>` : ''}
+                                </div>
+                                <h3 class="card-title">${judul || 'Momen Kenangan'}</h3>
+                                <p class="card-story">${cerita || ''}</p>
+                                <div class="card-footer">
+                                    <span class="location-tag">${lokasi ? `📍 ${lokasi}` : ''}</span>
+                                </div>
+                                <div class="admin-action-box" style="display: ${isAdminLoggedIn ? 'block' : 'none'};">
+                                    <button class="admin-sub-btn" onclick="triggerAddPhotos('${id}')">➕ Tambah Foto ke Momen Ini</button>
+                                    <button class="admin-delete-btn" onclick="deleteAlbumCard('${id}', this)">🗑️ Hapus Kenangan Ini</button>
+                                </div>
+                            </div>
+                        `;
+                        albumContainer.appendChild(card);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    albumContainer.className = "status-msg";
+                    albumContainer.innerHTML = 'Gagal memuat kenangan. Pastikan koneksi internet stabil.';
+                });
         }
 
-        function parseCSV(text) {
-            const lines = text.split('\n').filter(l => l.trim() !== '');
-            const results = [];
-            for (let i = 0; i < lines.length; i++) {
-                const matches = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-                if (matches) {
-                    results.push(matches.map(val => val.replace(/^"|"$/g, '').replace(/""/g, '"')));
+        function deleteAlbumCard(idCard, elementBtn) {
+            if (!confirm("Apakah Anda yakin ingin menghapus kenangan ini secara permanen?")) return;
+
+            elementBtn.disabled = true;
+            elementBtn.innerText = "Penghapusan...";
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    action: 'delete',
+                    id: String(idCard).trim()
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.result === 'success') {
+                    alert("Kenangan berhasil dihapus!");
+                    // Langsung hapus kartu dari tampilan tanpa perlu tunggu reload CSV
+                    const card = elementBtn.closest('.card');
+                    if (card) card.remove();
+                } else {
+                    alert("Gagal menghapus: " + (data.message || 'Kesalahan sistem'));
+                    elementBtn.disabled = false;
+                    elementBtn.innerText = "🗑️ Hapus Kenangan Ini";
                 }
-            }
-            return results;
-        }
-
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmit');
-            const fileInput = document.getElementById('fotoFile');
-            if (!fileInput.files || fileInput.files.length === 0) return;
-
-            btn.disabled = true;
-            btn.innerText = "📤 Mengunggah Foto...";
-
-            try {
-                const file = fileInput.files[0];
-                const base64Data = await convertFileToBase64(file);
-
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        action: 'saveData',
-                        judul: document.getElementById('judul').value,
-                        tanggal: document.getElementById('tanggalFoto').value,
-                        lokasi: document.getElementById('lokasi').value,
-                        usia: calculatedUsiaText,
-                        cerita: document.getElementById('cerita').value,
-                        fileName: file.name, mimeType: file.type, fileData: base64Data
-                    })
-                });
-
-                alert("Kenangan berhasil disimpan! ✨");
-                document.getElementById('uploadForm').reset();
-                document.getElementById('calculatedAge').innerText = "";
-                document.getElementById('exifNotice').innerText = "";
-                setTimeout(loadAlbum, 3500);
-            } catch (err) {
-                alert("Gagal mengunggah kenangan.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "📤 Simpan ke Album";
-            }
-        }
-
-        function convertFileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result.split(',')[1]);
-                reader.onerror = error => reject(error);
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Terjadi kesalahan koneksi saat menghapus.");
+                elementBtn.disabled = false;
+                elementBtn.innerText = "🗑️ Hapus Kenangan Ini";
             });
         }
 
-        function triggerAddPhotos(id) {
-            targetCardIdForAdd = id;
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('btnSubmit');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "⏳ Menyimpan Ke Google Sheets...";
+
+            const fileInput = document.getElementById('fotoFile');
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(evt) {
+                const base64Data = evt.target.result.split(',')[1];
+                const payload = {
+                    action: 'upload',
+                    id: 'id_' + Date.now(),
+                    filename: file.name,
+                    mimeType: file.type,
+                    base64: base64Data,
+                    judul: document.getElementById('judul').value,
+                    tanggalFoto: document.getElementById('tanggalFoto').value,
+                    lokasi: document.getElementById('lokasi').value,
+                    cerita: document.getElementById('cerita').value,
+                    usia: calculatedUsiaText
+                };
+
+                fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "📤 Simpan ke Album";
+                    if (data.result === 'success') {
+                        alert("Berhasil menambah kenangan!");
+                        document.getElementById('uploadForm').reset();
+                        document.getElementById('calculatedAge').innerText = "";
+                        document.getElementById('exifNotice').innerText = "";
+                        loadAlbum();
+                    } else {
+                        alert("Gagal menyimpan data: " + data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "📤 Simpan ke Album";
+                    alert("Terjadi kesalahan koneksi saat mengunggah foto.");
+                });
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function triggerAddPhotos(cardId) {
+            targetCardIdForAdd = cardId;
             document.getElementById('additionalPhotoInput').click();
         }
 
-        // Fungsi penambahan foto berurutan (sequential loop) agar stabil untuk multiple file
-        async function handleAdditionalPhotos(input) {
+        function handleAdditionalPhotos(input) {
             if (!input.files || input.files.length === 0 || !targetCardIdForAdd) return;
 
-            const files = input.files;
-            alert(`Mulai mengunggah ${files.length} foto tambahan... Mohon tunggu sampai selesai ⏳`);
+            const files = Array.from(input.files);
+            alert(`Mengunggah ${files.length} foto tambahan... Mohon tunggu.`);
 
-            try {
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const base64Data = await convertFileToBase64(file);
-
-                    await fetch(WEB_APP_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({
-                            action: 'addPhoto', 
-                            id: targetCardIdForAdd,
-                            fileName: file.name, 
-                            mimeType: file.type, 
-                            fileData: base64Data
-                        })
-                    });
-
-                    // Jeda sejenak antar file agar server Apps Script stabil
-                    await new Promise(resolve => setTimeout(resolve, 800));
-                }
-
-                alert("Semua foto tambahan berhasil diunggah! ✨");
-                input.value = "";
-                setTimeout(loadAlbum, 3000);
-            } catch (err) {
-                alert("Gagal mengunggah foto tambahan.");
-                console.error(err);
-            }
-        }
-
-        async function deleteMemory(id) {
-            if (!confirm("Yakin ingin menghapus kenangan ini?")) return;
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'delete', id: id })
+            const promises = files.map(file => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        resolve({
+                            filename: file.name,
+                            mimeType: file.type,
+                            base64: e.target.result.split(',')[1]
+                        });
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
                 });
-                
-                alert("Perintah hapus dikirim. Memperbarui galeri...");
-                // Jeda 3 detik agar Google Spreadsheet selesai membersihkan baris secara fisik
-                setTimeout(loadAlbum, 3000);
-            } catch (err) {
-                alert("Gagal menghapus.");
-                console.error(err);
+            });
+
+            Promise.all(promises).then(fileDataArray => {
+                fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        action: 'addPhotos',
+                        id: targetCardIdForAdd,
+                        files: fileDataArray
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.result === 'success') {
+                        alert("Foto berhasil ditambahkan!");
+                        loadAlbum();
+                    } else {
+                        alert("Gagal menambah foto: " + data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Terjadi kesalahan saat mengunggah foto tambahan.");
+                });
+            });
+        }
+
+        function parseCSV(text) {
+            const lines = [];
+            let row = [];
+            let inQuotes = false;
+            let currentStr = '';
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i+1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        currentStr += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    row.push(currentStr.trim());
+                    currentStr = '';
+                } else if ((char === '\r' || char === '\n') && !inQuotes) {
+                    if (char === '\r' && nextChar === '\n') i++;
+                    row.push(currentStr.trim());
+                    lines.push(row);
+                    row = [];
+                    currentStr = '';
+                } else {
+                    currentStr += char;
+                }
+            }
+            if (currentStr || row.length > 0) {
+                row.push(currentStr.trim());
+                lines.push(row);
+            }
+            return lines;
+        }
+
+        function openModalGroup(fileIdsStr, startIndex) {
+            const ids = fileIdsStr.split(',').map(s => s.trim()).filter(Boolean);
+            currentImageGroup = ids.map(id => id.includes('http') ? id : `https://lh3.googleusercontent.com/d/${id}`);
+            currentImageIndex = startIndex;
+            updateModalView();
+            document.getElementById('imageModal').style.display = 'flex';
+            if (!isModalOpen) { isModalOpen = true; history.pushState({ modalOpen: true }, ""); }
+        }
+
+        function closeModalDirect() { if (isModalOpen) history.back(); }
+        function closeModalUI() { document.getElementById('imageModal').style.display = 'none'; isModalOpen = false; }
+
+        function updateModalView() {
+            const img = document.getElementById('modalImg');
+            img.src = currentImageGroup[currentImageIndex];
+            const prevBtn = document.getElementById('btnPrev');
+            const nextBtn = document.getElementById('btnNext');
+            const counter = document.getElementById('modalCounter');
+
+            if (currentImageGroup.length > 1) {
+                prevBtn.style.display = 'block'; nextBtn.style.display = 'block'; counter.style.display = 'block';
+                counter.innerText = `${currentImageIndex + 1} / ${currentImageGroup.length}`;
+            } else {
+                prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; counter.style.display = 'none';
             }
         }
+
+        function prevImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex > 0) ? currentImageIndex - 1 : currentImageGroup.length - 1; updateModalView(); }
+        function nextImage(e) { if(e) e.stopPropagation(); currentImageIndex = (currentImageIndex < currentImageGroup.length - 1) ? currentImageIndex + 1 : 0; updateModalView(); }
     </script>
 </body>
 </html>
