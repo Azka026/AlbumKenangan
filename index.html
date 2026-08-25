@@ -340,7 +340,7 @@
 
     <script>
         const SHEET_BASE_URL = 'https://docs.google.com/spreadsheets/d/1Vib5srs0rsTCmlQRqoc6LJYQAcdsGLQJVRQeqrkynew/gviz/tq?tqx=out:csv';
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby51SO8RU6-9liD7jEfL3Af0-IwNZJELY6yD5H7YCzwEANZIF8gFYQ_gJVJ53oOlwEM/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzqY3cx-uzJ6gmV7KrMAMJ5-BwiLoZ66U4MXEPb-LLJi5J3-sAGF3i3qu0pXHhxJMGD/exec';
         const ADMIN_PASSWORD = "azka23";
 
         let calculatedUsiaText = "";
@@ -517,7 +517,6 @@
             const albumContainer = document.getElementById('album-list');
             albumContainer.innerHTML = 'Memuat album kenangan... ✨';
 
-            // Menambahkan timestamp unik (&nocache=) untuk mengabaikan cache Google Sheet
             const freshUrl = `${SHEET_BASE_URL}&nocache=${new Date().getTime()}`;
 
             fetch(freshUrl)
@@ -533,7 +532,6 @@
                     albumContainer.className = "";
                     albumContainer.innerHTML = '';
 
-                    // Urutkan momen dari yang terbaru (indeks baris paling bawah)
                     for (let i = rows.length - 1; i >= 1; i--) {
                         const [id, tanggal, judul, cerita, lokasi, usia, fileFoto, fileIds] = rows[i];
                         if (!id) continue;
@@ -612,7 +610,6 @@
             .then(data => {
                 if (data.result === 'success') {
                     alert("Kenangan berhasil dihapus!");
-                    // Langsung hapus kartu dari tampilan tanpa perlu tunggu reload CSV
                     const card = elementBtn.closest('.card');
                     if (card) card.remove();
                 } else {
@@ -629,23 +626,62 @@
             });
         }
 
-        function handleFormSubmit(e) {
+        // Kompres foto secara otomatis agar tidak gagal upload karena file terlalu besar
+        function compressAndConvertToBase64(file, maxWidth = 1200, quality = 0.75) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        resolve(dataUrl.split(',')[1]);
+                    };
+                    img.onerror = error => reject(error);
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function handleFormSubmit(e) {
             e.preventDefault();
             const submitBtn = document.getElementById('btnSubmit');
             submitBtn.disabled = true;
-            submitBtn.innerText = "⏳ Menyimpan Ke Google Sheets...";
+            submitBtn.innerText = "⏳ Memproses & Mengunggah Foto...";
 
             const fileInput = document.getElementById('fotoFile');
             const file = fileInput.files[0];
-            const reader = new FileReader();
 
-            reader.onload = function(evt) {
-                const base64Data = evt.target.result.split(',')[1];
+            if (!file) {
+                alert("Pilih foto terlebih dahulu!");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "📤 Simpan ke Album";
+                return;
+            }
+
+            try {
+                const base64Data = await compressAndConvertToBase64(file);
+
                 const payload = {
                     action: 'upload',
                     id: 'id_' + Date.now(),
-                    filename: file.name,
-                    mimeType: file.type,
+                    filename: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+                    mimeType: 'image/jpeg',
                     base64: base64Data,
                     judul: document.getElementById('judul').value,
                     tanggalFoto: document.getElementById('tanggalFoto').value,
@@ -654,34 +690,32 @@
                     usia: calculatedUsiaText
                 };
 
-                fetch(WEB_APP_URL, {
+                const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(payload)
-                })
-                .then(res => res.json())
-                .then(data => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "📤 Simpan ke Album";
-                    if (data.result === 'success') {
-                        alert("Berhasil menambah kenangan!");
-                        document.getElementById('uploadForm').reset();
-                        document.getElementById('calculatedAge').innerText = "";
-                        document.getElementById('exifNotice').innerText = "";
-                        loadAlbum();
-                    } else {
-                        alert("Gagal menyimpan data: " + data.message);
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "📤 Simpan ke Album";
-                    alert("Terjadi kesalahan koneksi saat mengunggah foto.");
                 });
-            };
 
-            reader.readAsDataURL(file);
+                const data = await response.json();
+
+                submitBtn.disabled = false;
+                submitBtn.innerText = "📤 Simpan ke Album";
+
+                if (data.result === 'success') {
+                    alert("Berhasil menambah kenangan!");
+                    document.getElementById('uploadForm').reset();
+                    document.getElementById('calculatedAge').innerText = "";
+                    document.getElementById('exifNotice').innerText = "";
+                    loadAlbum();
+                } else {
+                    alert("Gagal menyimpan data: " + data.message);
+                }
+            } catch (err) {
+                console.error("Upload error detail:", err);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "📤 Simpan ke Album";
+                alert("Terjadi kesalahan koneksi saat mengunggah foto. Pastikan jaringan internet stabil.");
+            }
         }
 
         function triggerAddPhotos(cardId) {
@@ -689,29 +723,23 @@
             document.getElementById('additionalPhotoInput').click();
         }
 
-        function handleAdditionalPhotos(input) {
+        async function handleAdditionalPhotos(input) {
             if (!input.files || input.files.length === 0 || !targetCardIdForAdd) return;
 
             const files = Array.from(input.files);
-            alert(`Mengunggah ${files.length} foto tambahan... Mohon tunggu.`);
+            alert(`Mengompres dan mengunggah ${files.length} foto tambahan... Mohon tunggu.`);
 
-            const promises = files.map(file => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        resolve({
-                            filename: file.name,
-                            mimeType: file.type,
-                            base64: e.target.result.split(',')[1]
-                        });
+            try {
+                const fileDataArray = await Promise.all(files.map(async file => {
+                    const base64 = await compressAndConvertToBase64(file);
+                    return {
+                        filename: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+                        mimeType: 'image/jpeg',
+                        base64: base64
                     };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-            });
+                }));
 
-            Promise.all(promises).then(fileDataArray => {
-                fetch(WEB_APP_URL, {
+                const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({
@@ -719,21 +747,20 @@
                         id: targetCardIdForAdd,
                         files: fileDataArray
                     })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.result === 'success') {
-                        alert("Foto berhasil ditambahkan!");
-                        loadAlbum();
-                    } else {
-                        alert("Gagal menambah foto: " + data.message);
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Terjadi kesalahan saat mengunggah foto tambahan.");
                 });
-            });
+
+                const data = await response.json();
+
+                if (data.result === 'success') {
+                    alert("Foto berhasil ditambahkan!");
+                    loadAlbum();
+                } else {
+                    alert("Gagal menambah foto: " + data.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Terjadi kesalahan saat mengunggah foto tambahan.");
+            }
         }
 
         function parseCSV(text) {
