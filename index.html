@@ -225,7 +225,6 @@
         .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #edf2f7; padding-top: 15px; }
         .location-tag { font-size: 0.85em; color: var(--text-muted); font-weight: 500; }
         
-        /* Tombol Download di Kartu Kenangan */
         .btn-download-card {
             background: #f0fff4;
             color: #276749;
@@ -353,7 +352,6 @@
         <div id="album-list" class="status-msg">Memuat album kenangan... ✨</div>
     </div>
 
-    <!-- Input tersembunyi untuk tambah foto (mendukung multiple files) -->
     <input type="file" id="additionalPhotoInput" accept="image/*" multiple style="display:none" onchange="handleAdditionalPhotos(this)">
 
     <div id="imageModal" class="image-modal">
@@ -395,7 +393,12 @@
         };
 
         window.onpopstate = function() { if (isModalOpen) closeModalUI(); };
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && isModalOpen) closeModalDirect(); });
+        document.addEventListener('keydown', function(e) { 
+            if (!isModalOpen) return;
+            if (e.key === 'Escape') closeModalDirect(); 
+            if (e.key === 'ArrowLeft') prevImage();
+            if (e.key === 'ArrowRight') nextImage();
+        });
 
         function toggleAdminMode() {
             if (isAdminLoggedIn) {
@@ -461,6 +464,18 @@
             localStorage.setItem('children_data', JSON.stringify(childrenData));
         }
 
+        function saveCurrentChildProfile() {
+            const childIndex = childrenData.findIndex(c => c.id === activeChildId);
+            if (childIndex !== -1) {
+                childrenData[childIndex].name = document.getElementById('childName').value;
+                childrenData[childIndex].parents = document.getElementById('childParents').value;
+                childrenData[childIndex].dob = document.getElementById('dob').value;
+                saveAllChildrenData();
+                renderChildDropdowns();
+                loadCurrentChildProfile();
+            }
+        }
+
         function loadCurrentChildProfile() {
             const child = childrenData.find(c => c.id === activeChildId) || childrenData[0];
             document.getElementById('childName').value = child.name || '';
@@ -493,22 +508,17 @@
 
             let years = taken.getFullYear() - birth.getFullYear();
             let months = taken.getMonth() - birth.getMonth();
-            let days = CustomDateDiff(birth, taken);
+            let days = taken.getDate() - birth.getDate();
 
-            function CustomDateDiff(b, t) {
-                let y = t.getFullYear() - b.getFullYear();
-                let m = t.getMonth() - b.getMonth();
-                let d = t.getDate() - b.getDate();
-                if (d < 0) {
-                    m--;
-                    const lastMonth = new Date(t.getFullYear(), t.getMonth(), 0);
-                    d += lastMonth.getDate();
-                }
-                if (m < 0) {
-                    y--;
-                    m += 12;
-                }
-                return d;
+            if (days < 0) {
+                months--;
+                const prevMonth = new Date(taken.getFullYear(), taken.getMonth(), 0);
+                days += prevMonth.getDate();
+            }
+
+            if (months < 0) {
+                years--;
+                months += 12;
             }
 
             let ageStr = "";
@@ -556,7 +566,6 @@
 
                     let dataRows = rows.slice(1);
 
-                    // Sorting: Momen terbaru di paling atas
                     dataRows.sort((a, b) => {
                         const dateA = new Date(a[1] || 0);
                         const dateB = new Date(b[1] || 0);
@@ -598,7 +607,6 @@
                             photoGridHtml = `<div class="photo-gallery-grid">${imgs}</div>`;
                         }
 
-                        // Menentukan URL foto pertama untuk tombol download cepat di kartu
                         const mainPhotoUrl = photoList[0] ? (photoList[0].includes('http') ? photoList[0] : `https://lh3.googleusercontent.com/d/${photoList[0]}`) : '';
 
                         card.innerHTML = `
@@ -630,7 +638,6 @@
                 });
         }
 
-        // FUNGSI UNTUK MENGUNDUH FOTO OTOmATIS
         async function downloadImage(imageSrc, filenameText, btnElement) {
             const originalText = btnElement ? btnElement.innerHTML : '';
             if (btnElement) {
@@ -653,7 +660,6 @@
                 setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
             } catch (err) {
                 console.error("Gagal mengunduh gambar via Fetch:", err);
-                // Fallback jika terjadi CORS issue saat mengunduh
                 window.open(imageSrc, '_blank');
             } finally {
                 if (btnElement) {
@@ -764,7 +770,8 @@
                     tanggalFoto: document.getElementById('tanggalFoto').value,
                     lokasi: document.getElementById('lokasi').value,
                     cerita: document.getElementById('cerita').value,
-                    usia: calculatedUsiaText
+                    usia: calculatedUsiaText,
+                    childId: activeChildId
                 };
 
                 const response = await fetch(WEB_APP_URL, {
